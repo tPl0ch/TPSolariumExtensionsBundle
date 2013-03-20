@@ -1,0 +1,24 @@
+{
+    "name": "tp/solarium-extensions-bundle",
+    "description": "A collection of useful extensions for the NelmioSolariumBundle created by Seldaek.",
+    "require": {
+        "doctrine/annotations": "dev-master",
+        "symfony/property-access": ">=2.2.0",
+        "nelmio/solarium-bundle": ">=1.1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Thomas Ploch",
+            "email": "tp@repsonsive-code.de"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": { "TP\\SolariumExtensionsBundle": "" }
+    },
+    "target-dir": "TP/SolariumExtensionsBundle"
+}

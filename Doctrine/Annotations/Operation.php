@@ -1,0 +1,25 @@
+<?php
+/**
+ * Document.php
+ *
+ * This file is part of the SolariumExtensionsBundle.
+ * Read the LICENSE file in the root of the project for information on copyright.
+ *
+ * @author Thomas Ploch <tp@responsive-code.de>
+ * @since  19.03.13
+ */
+namespace TP\SolariumExtensionsBundle\Doctrine\Annotations;
+
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
+
+/**
+ * Class Document
+ *
+ * @package TP\SolariumExtensionsBundle\Doctrine\Annotations
+ * @Annotation
+ */
+class Operation
+{
+    public $service;
+}
