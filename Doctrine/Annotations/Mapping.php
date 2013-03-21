@@ -10,15 +10,16 @@
  */
 namespace TP\SolariumExtensionsBundle\Doctrine\Annotations;
 
-use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation as BaseAnnotation;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
 
 /**
  * Class Mapping
  *
  * @package TP\SolariumExtensionsBundle\Doctrine\Annotations
+ * @Annotation
  */
-class Mapping extends Annotation
+class Mapping extends BaseAnnotation
 {
     /**
      * Mapping storage for default dynamic fields definitions.
@@ -54,27 +55,6 @@ class Mapping extends Annotation
     }
 
     /**
-     * Indicates if the mappings have already been merged
-     *
-     * @var bool
-     */
-    private $isMerged = false;
-
-    /**
-     * Holds the processed mapping array
-     *
-     * @var array
-     */
-    private $processedMapping = array();
-
-    /**
-     * Indicates if the mappings have been processed
-     *
-     * @var bool
-     */
-    private $isProcessed = false;
-
-    /**
      * Contains the custom field type mapping for this Document
      *
      * @var array
@@ -89,6 +69,43 @@ class Mapping extends Annotation
     public $strict = false;
 
     /**
+     * @param array $options
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Array $options)
+    {
+        if (isset($options['strict'])) {
+            $this->strict = (bool) $options['strict'];
+        }
+
+        if (isset($options['mapping'])) {
+            if (!is_array($options['mapping'])) {
+                $type    = gettype($options['mapping']);
+                $message = "Invalid type for 'mapping' given. Expected 'Array', but got '%s'";
+
+                throw new \InvalidArgumentException(sprintf($message, $type));
+            }
+
+            foreach (array_keys($options['mapping']) as $type) {
+                if ($this->isValidType($type)) {
+                    $this->mapping[$type] = $options['mapping'][$type];
+                } else {
+                    if ($this->strict === true) {
+                        $message = "Invalid field type '%s' found in 'mapping' and strict checking is enabled.";
+
+                        throw new \InvalidArgumentException(sprintf($message, $type));
+                    }
+                }
+            }
+
+            $this->mapping = array_merge(self::$defaultMappingStorage, $this->mapping);
+        } else {
+            $this->mapping = self::$defaultMappingStorage;
+        }
+    }
+
+    /**
      * Processes a given mapping storage array, but checks all keys (Types) and drops invalid keys silently.
      * If strict checking is enabled, will raise an InvalidArgumentException instead on first invalid key.
      *
@@ -98,28 +115,6 @@ class Mapping extends Annotation
      */
     public function getMappings()
     {
-        if (!is_array($this->mapping)) {
-            $type    = gettype($this->mapping);
-            $message = "Invalid type for 'mapping' given. Expected 'Array', but got '%s'";
-
-            throw new \InvalidArgumentException(sprintf($message, $type));
-        }
-
-        foreach (array_keys($this->mapping) as $type) {
-            if ($this->isValidType($type)) {
-                $this->processedMapping[$type] = (string) $this->mapping[$type];
-            } else {
-                if ((bool) $this->strict) {
-                    $message = "Invalid field type '%s' found in 'mapping' and strict checking is enabled.";
-
-                    throw new \InvalidArgumentException(sprintf($message, $type));
-                }
-            }
-        }
-
-        $this->mergeMappings(true);
-        $this->isProcessed = true;
-
         return $this->mapping;
     }
 
@@ -132,14 +127,8 @@ class Mapping extends Annotation
      */
     public function getMapping($type)
     {
-        if (!$this->isProcessed) {
-            $this->getMappings();
-        }
-
         if (!$this->isValidType($type)) {
-            $message = "Invalid Field type '%s' given. Only %s are allowed.";
-
-            throw new \InvalidArgumentException(sprintf($message, $type, implode(',', Field::getFieldTypes())));
+            return null;
         }
 
         return $this->mapping[$type];
@@ -152,28 +141,8 @@ class Mapping extends Annotation
      */
     public function restoreMapping()
     {
-        $this->isMerged    = false;
-        $this->isProcessed = false;
-        $this->mapping     = self::$defaultMappingStorage;
+        $this->mapping = self::$defaultMappingStorage;
 
         return $this;
-    }
-
-    /**
-     * Merges the custom and the default mappings and sets a flag.
-     *
-     * @param bool $force
-     *
-     * @return array
-     */
-    private function mergeMappings($force = false)
-    {
-        if ($force || !$this->isMerged) {
-            $this->mapping = array_merge(self::$defaultMappingStorage, $this->processedMapping);
-
-            $this->isMerged = true;
-        }
-
-        return $this->mapping;
     }
 }

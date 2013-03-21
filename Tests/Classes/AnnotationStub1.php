@@ -13,10 +13,16 @@ namespace TP\SolariumExtensionsBundle\Tests\Classes;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations as Solarium;
 
 /**
- * Class AnnotationStub
+ * Class AnnotationStub1
  *
  * @package TP\SolariumExtensionsBundle\Tests\Classes
- * @Solarium\Document
+ *
+ * @Solarium\Document(
+ *      operations={
+ *          @Solarium\Operation("all", service="solarium.client.default")
+ *      },
+ *      boost="2.4"
+ * )
  */
 class AnnotationStub1
 {

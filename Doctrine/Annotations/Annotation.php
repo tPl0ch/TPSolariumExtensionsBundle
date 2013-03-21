@@ -12,14 +12,14 @@ namespace TP\SolariumExtensionsBundle\Doctrine\Annotations;
 
 use Doctrine\Common\Annotations\Annotation as BaseAnnotation;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
-use TP\SolariumExtensionsBundle\Doctrine\Annotations\Document;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 
 /**
  * Class Annotation
  *
  * @package TP\SolariumExtensionsBundle\Doctrine\Annotations
  */
-class Annotation extends BaseAnnotation
+class Annotation
 {
     /**
      * Checks if a given field type is multiValued
@@ -52,6 +52,6 @@ class Annotation extends BaseAnnotation
      */
     public function isValidOperation($operation)
     {
-        return in_array((string) $operation, Document::getOperationTypes());
+        return in_array((string) $operation, Operation::getOperationTypes());
     }
 }

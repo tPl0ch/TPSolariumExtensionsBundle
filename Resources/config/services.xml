@@ -4,10 +4,22 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
-        <parameter key="solarium.service_manager.class">TP\SolariumExtensionsBundle\Manager\SolariumServiceManager</parameter>
+        <parameter key="solarium_extensions.service_manager.class">TP\SolariumExtensionsBundle\Manager\SolariumServiceManager</parameter>
+        <parameter key="solarium_extensions.driver.class">TP\SolariumExtensionsBundle\Doctrine\Annotations\Driver\SolariumDriver</parameter>
+        <parameter key="solarium_extensions.doctrine_listener.class">TP\SolariumExtensionsBundle\EventListener\DoctrineListener</parameter>
     </parameters>
     <services>
-        <service id="solarium.service_manager" class="%solarium.service_manager.class%">
+        <service id="solarium_extensions.service_manager" class="%solarium_extensions.service_manager.class%" />
+        <service id="solarium_extensions.annotations_reader" class="Doctrine\Common\Annotations\AnnotationReader" />
+        <service id="solarium_extensions.driver" class="%solarium_extensions.driver.class%">
+            <argument type="service" id="solarium_extensions.annotations_reader" />
+        </service>
+        <service id="solarium_extensions.doctrine_listener" class="%solarium_extensions.doctrine_listener.class%">
+            <argument type="service" id="solarium_extensions.driver" />
+            <tag name="doctrine.event_listener" event="postPersist" method="postPersist"/>
+            <tag name="doctrine.event_listener" event="postRemove" method="postRemove"/>
+            <tag name="doctrine.event_listener" event="postUpdate" method="postUpdate"/>
+            <tag name="doctrine.event_listener" event="onFlush" method="onFlush"/>
         </service>
     </services>
 </container>

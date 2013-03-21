@@ -41,7 +41,7 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
 
         $container = $this->getTestContainer($config);
 
-        $manager = $container->get('solarium.service_manager');
+        $manager = $container->get('solarium_extensions.service_manager');
 
         $this->assertInstanceOf(
             'TP\SolariumExtensionsBundle\Manager\SolariumServiceManager',

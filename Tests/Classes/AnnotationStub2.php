@@ -16,7 +16,17 @@ use TP\SolariumExtensionsBundle\Doctrine\Annotations as Solarium;
  * Class AnnotationStub2
  *
  * @package TP\SolariumExtensionsBundle\Tests\Classes
- * @Solarium\Document(boost=2.4, operations={'save', 'delete'})
+ *
+ * @package TP\SolariumExtensionsBundle\Tests\Classes
+ *
+ * @Solarium\Document(
+ *      operations={
+ *          @Solarium\Operation("delete", service="solarium.client.delete"),
+ *          @Solarium\Operation("update", service="solarium.client.update"),
+ *          @Solarium\Operation("save", service="solarium.client.save")
+ *      },
+ *      boost="2.4"
+ * )
  */
 class AnnotationStub2
 {

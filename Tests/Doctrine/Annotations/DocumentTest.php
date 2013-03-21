@@ -12,6 +12,7 @@ namespace TP\SolariumExtensionsBundle\Tests\Doctrine\Annotations;
 
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Document;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 
 /**
  * Class DocumentTest
@@ -25,216 +26,151 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
      */
     public $document;
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function setUp()
+    public function testHasOperation()
     {
         $this->document = new Document(array(
-            'service' => 'test.service'
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_SAVE, 'service' => 'test.all')),
+                new Operation(array('value' => Operation::OPERATION_UPDATE, 'service' => 'test.update'))
+            )
+        ));
+
+        $this->assertTrue($this->document->hasOperation(Operation::OPERATION_SAVE));
+        $this->assertTrue($this->document->hasOperation(Operation::OPERATION_UPDATE));
+
+        $this->assertFalse($this->document->hasOperation(Operation::OPERATION_DELETE));
+        $this->assertFalse($this->document->hasOperation(Operation::OPERATION_ALL));
+        $this->assertFalse($this->document->hasOperation('INVALID'));
+    }
+
+    public function testDefaultServiceForAll()
+    {
+        $this->document = new Document(array(
+            'value' => 'test.service'
+        ));
+
+        $expected = new Operation(array(
+            'value'     => Operation::OPERATION_ALL,
+            'service'   => 'test.service'
+        ));
+
+        $this->assertEquals($expected, $this->document->getOperation(Operation::OPERATION_ALL));
+    }
+
+    public function testGetOperation()
+    {
+        $operationOne = new Operation(array('value' => Operation::OPERATION_SAVE, 'service' => 'test.all'));
+        $operationTwo = new Operation(array('value' => Operation::OPERATION_UPDATE, 'service' => 'test.update'));
+
+        $this->document = new Document(array(
+            'operations' => array(
+                $operationOne,
+                $operationTwo
+            )
+        ));
+
+        $this->assertSame($operationOne, $this->document->getOperation(Operation::OPERATION_SAVE));
+        $this->assertSame($operationTwo, $this->document->getOperation(Operation::OPERATION_UPDATE));
+
+        $this->assertNull($this->document->getOperation(Operation::OPERATION_DELETE));
+    }
+
+    public function testBoostValueConversion()
+    {
+        $this->document = new Document(array(
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_ALL, 'service' => 'test.service'))
+            ),
+            'boost' => '124'
+        ));
+
+        $this->assertEquals(124.0, $this->document->boost);
+
+        $this->document = new Document(array(
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_ALL, 'service' => 'test.service'))
+            ),
+            'boost' => 32
+        ));
+        $this->assertEquals(32.0, $this->document->boost);
+
+        $this->document = new Document(array(
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_ALL, 'service' => 'test.service'))
+            ),
+            'boost' => 24.35
+        ));
+        $this->assertEquals(24.35, $this->document->boost);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Required parameter 'operations' is missing
+     */
+    public function testMissingOperationsException()
+    {
+        $this->document = new Document(array());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Parameter 'operations' must be of type 'Array', 'string' given.
+     */
+    public function testOperationsInvalidType()
+    {
+        $this->document = new Document(array('operations' => 'foo'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Operations must be of type 'Operation', 'object' given.
+     */
+    public function testOperationInvalidType()
+    {
+        $this->document = new Document(array('operations' => array(
+            new \stdClass()
+        )));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Parameter 'Boost' must be a numeric value.
+     */
+    public function testInvalidBoostValue()
+    {
+        $this->document = new Document(array(
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_ALL, 'service' => 'test.service'))
+            ),
+            'boost' => 'foo'
         ));
     }
 
     /**
-     * @param string $type
-     *
-     * @dataProvider getOperationTypes
+     * @expectedException \LogicException
+     * @expectedExceptionMessage You mustn't specify other Operations when using 'Operation::OPERATION_ALL'.
      */
-    public function testServiceParameterString($operation)
-    {
-        $this->assertEquals('test.service', $this->document->getService($operation));
-    }
-
-    /**
-     * Tests that array service parameter works as expected
-     */
-    public function testServiceParameterArray()
-    {
-        $this->document->service = array(
-            Document::OPERATION_SAVE   => 'test.save',
-            Document::OPERATION_UPDATE => 'test.update',
-            Document::OPERATION_DELETE => 'test.delete'
-        );
-
-        $this->assertEquals('test.save', $this->document->getService(Document::OPERATION_SAVE));
-        $this->assertEquals('test.update', $this->document->getService(Document::OPERATION_UPDATE));
-        $this->assertEquals('test.delete', $this->document->getService(Document::OPERATION_DELETE));
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage The 'service' parameter is required.
-     */
-    public function testServiceParameterRequired()
-    {
-        $this->document->service = null;
-        $this->document->getService(Document::OPERATION_SAVE);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage The operation 'INVALID' is invalid. Only save,update,delete are supported.
-     */
-    public function testGetServiceInvalidType()
-    {
-        $this->document->getService('INVALID');
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage The specified service for operation 'save' is invalid. Expected 'Array' or 'String', 'double' given.
-     */
-    public function testInvalidServiceParameter()
-    {
-        $this->document->service = 12.23;
-        $this->document->getService(Document::OPERATION_SAVE);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage The service array lacks the service definition for operation 'delete'.
-     */
-    public function testServiceParameterArrayIncomplete()
-    {
-        $this->document->service = array(
-            Document::OPERATION_SAVE   => 'test.save',
-            Document::OPERATION_UPDATE => 'test.update'
-        );
-        $this->document->getService(Document::OPERATION_DELETE);
-    }
-
-    /**
-     * Tests that the default operations are correct
-     */
-    public function testDefaultOperations()
-    {
-        $expected = array(Document::OPERATION_SAVE, Document::OPERATION_UPDATE, Document::OPERATION_DELETE);
-        $this->assertEquals($expected, Document::getOperationTypes());
-    }
-
-    /**
-     * Tests that the operations parameter setting and getting works as expected
-     */
-    public function testOperationsParameter()
-    {
-        $expected = array(Document::OPERATION_SAVE, Document::OPERATION_UPDATE);
-        $this->document->operations = $expected;
-        $this->assertEquals($expected, $this->document->getOperations());
-
-        $this->document->operations = array('INVALID', Document::OPERATION_SAVE, Document::OPERATION_UPDATE);
-        $this->assertEquals($expected, $this->document->getOperations());
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid type for key 'operations'. Expected 'Array', but got 'integer'.
-     */
-    public function testInvalidOperationsType()
+    public function testLogicExceptionAllOperationOnly()
     {
         $this->document = new Document(array(
-            'operations' => 24
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_ALL, 'service' => 'test.service')),
+                new Operation(array('value' => Operation::OPERATION_UPDATE, 'service' => 'test.service'))
+            )
         ));
-        $this->document->getOperations();
     }
 
     /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage The 'operation' array contains invalid keys and strict checking is enabled.
+     * @expectedException \LogicException
+     * @expectedExceptionMessage You have a duplicate Operation definition for 'update'.
      */
-    public function testInvalidOperationEntryStrict()
+    public function testLogicExceptionDuplicateOperation()
     {
-        $this->document->operations = array('INVALID', Document::OPERATION_SAVE, Document::OPERATION_UPDATE);
-        $this->document->getOperations(true);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage No valid operation was specified in 'operations'. Valid operations are save,update,delete.
-     */
-    public function testOperationsEmpty()
-    {
-        $this->document->operations = array('INVALID', 'ANOTHER_INVALID');
-        $this->document->getOperations();
-    }
-
-    /**
-     * Tests that the boost value is converted from numeric to float
-     */
-    public function testGetBoost()
-    {
-        $this->document->boost = 1;
-        $this->assertEquals(1.0, $this->document->getBoost());
-
-        $this->document->boost = '1';
-        $this->assertEquals(1.0, $this->document->getBoost());
-
-        $this->document->boost = 2.4;
-        $this->assertEquals(2.4, $this->document->getBoost());
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid type for 'boost' value. Expected 'numeric', got 'array'.
-     */
-    public function testInvalidBoost()
-    {
-        $this->document->boost = array();
-        $this->document->getBoost();
-    }
-
-    /**
-     * Tests that valid and invalid operations are recognized
-     */
-    public function testIsValidOperation()
-    {
-        $this->assertTrue($this->document->isValidOperation(Document::OPERATION_SAVE));
-        $this->assertTrue($this->document->isValidOperation(Document::OPERATION_DELETE));
-        $this->assertTrue($this->document->isValidOperation(Document::OPERATION_UPDATE));
-        $this->assertFalse($this->document->isValidOperation('INVALID'));
-    }
-
-    /**
-     * Tests that valid field types are recognized.
-     *
-     * @dataProvider getFieldTypes
-     */
-    public function testIsValidFieldType($type)
-    {
-        $this->assertTrue($this->document->isValidType($type));
-    }
-
-    /**
-     * Tests that invalid Field types are recognized
-     */
-    public function testIsValidFieldTypeInvalid()
-    {
-        $this->assertFalse($this->document->isValidType('INVALID'));
-    }
-
-    /**
-     * @return array
-     */
-    public function getFieldTypes()
-    {
-        $return = array();
-        foreach (Field::getFieldTypes() as $type) {
-            $return[] = array($type);
-        }
-
-        return $return;
-    }
-
-    /**
-
-     * @return array
-     */
-    public function getOperationTypes()
-    {
-        $return = array();
-        foreach (Document::getOperationTypes() as $type) {
-            $return[] = array($type);
-        }
-
-        return $return;
+        $this->document = new Document(array(
+            'operations' => array(
+                new Operation(array('value' => Operation::OPERATION_UPDATE, 'service' => 'test.service')),
+                new Operation(array('value' => Operation::OPERATION_UPDATE, 'service' => 'test.service'))
+            )
+        ));
     }
 }

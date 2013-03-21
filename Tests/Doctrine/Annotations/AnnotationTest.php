@@ -13,6 +13,7 @@ namespace TP\SolariumExtensionsBundle\Tests\Doctrine\Annotations;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Document;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 
 /**
  * Class AnnotationTest
@@ -117,7 +118,7 @@ class AnnotationTest extends \PHPUnit_Framework_TestCase
     {
         $return = array();
 
-        foreach (Document::getOperationTypes() as $type) {
+        foreach (Operation::getOperationTypes() as $type) {
             $return[] = array($type);
         }
 

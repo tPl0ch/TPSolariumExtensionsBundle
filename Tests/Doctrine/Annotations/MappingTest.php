@@ -33,82 +33,50 @@ class MappingTest extends \PHPUnit_Framework_TestCase
         $this->mapping = new Mapping(array());
     }
 
-    /**
-     * Tests the default mapping table
-     */
+    public function testDefaultMappingsGetSet()
+    {
+        $this->assertEquals($this->getDefaultMappingArray(), $this->mapping->getMappings());
+    }
+
     public function testDefaultMapping()
     {
         $this->assertEquals($this->getDefaultMappingArray(), Mapping::getDefaultMapping());
     }
 
     /**
-     * Tests that the default behavior of the mapping paramter works
-     */
-    public function testMappingsParameter()
-    {
-        $this->mapping->mapping = array(
-            Field::TYPE_INT     => '_test',
-            Field::TYPE_BOOLEAN => '_bool',
-        );
-
-        $expected = $this->getDefaultMappingArray();
-        $expected[Field::TYPE_INT]     = '_test';
-        $expected[Field::TYPE_BOOLEAN] = '_bool';
-
-        $this->assertEquals($expected, $this->mapping->getMappings());
-        $this->assertEquals('_test', $this->mapping->getMapping(Field::TYPE_INT));
-        $this->assertEquals('_bool', $this->mapping->getMapping(Field::TYPE_BOOLEAN));
-    }
-
-    /**
-     * Tests that a call to get Mapping triggers mapping processing
-     */
-    public function testGetMappingTriggersProcessing()
-    {
-        $this->mapping->mapping = array(Field::TYPE_INT => '_test');
-        $this->assertEquals('_test', $this->mapping->getMapping(Field::TYPE_INT));
-
-        $expected = $this->getDefaultMappingArray();
-        $expected[Field::TYPE_INT] = '_test';
-
-        $this->assertEquals($expected, $this->mapping->getMappings());
-    }
-
-    /**
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid Field type 'INVALID' given. Only
+     * @expectedExceptionMessage Invalid type for 'mapping' given. Expected 'Array', but got 'string'
      */
-    public function testGetMappingInvalidType()
+    public function testInvalidMappingValue()
     {
-        $this->mapping->getMapping('INVALID');
+        $this->mapping = new Mapping(array('mapping' => 'foo'));
     }
 
-    /**
-     * Tests that you can restore the mappings to its defaults
-     */
-    public function testRestoreMapping()
+    public function testMappingGetsMergedWithDefault()
     {
-        $this->mapping->mapping = array(Field::TYPE_INT => '_test');
-        $this->mapping->restoreMapping();
-
-        $this->assertEquals('_i', $this->mapping->getMapping(Field::TYPE_INT));
-        $this->assertEquals($this->getDefaultMappingArray(), $this->mapping->getMappings());
-    }
-
-    /**
-     * Tests that invalid keys are silently ignored when strict checking is off
-     */
-    public function testInvalidKeysSilent()
-    {
-        $this->mapping->mapping = array(
-            Field::TYPE_INT     => '_test',
-            Field::TYPE_BOOLEAN => '_bool',
-            'INVALID'           => 'INVALID'
-        );
+        $this->mapping = new Mapping(array(
+            'mapping' => array(
+                Field::TYPE_BOOLEAN => '_test'
+            )
+        ));
 
         $expected = $this->getDefaultMappingArray();
-        $expected[Field::TYPE_INT]     = '_test';
-        $expected[Field::TYPE_BOOLEAN] = '_bool';
+        $expected[Field::TYPE_BOOLEAN] = '_test';
+
+        $this->assertEquals($expected, $this->mapping->getMappings());
+    }
+
+    public function testInvalidKeysGetDroppedWhenStrictFalse()
+    {
+        $this->mapping = new Mapping(array(
+            'mapping' => array(
+                Field::TYPE_BOOLEAN => '_test',
+                'INVALID' => 'INVALID'
+            )
+        ));
+
+        $expected = $this->getDefaultMappingArray();
+        $expected[Field::TYPE_BOOLEAN] = '_test';
 
         $this->assertEquals($expected, $this->mapping->getMappings());
     }
@@ -117,39 +85,44 @@ class MappingTest extends \PHPUnit_Framework_TestCase
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Invalid field type 'INVALID' found in 'mapping' and strict checking is enabled.
      */
-    public function testInvalidKeysException()
+    public function testInvalidKeysRaiseExceptionStrictTrue()
     {
-        $this->mapping->strict  = true;
-        $this->mapping->mapping = array(
-            Field::TYPE_INT     => '_test',
-            Field::TYPE_BOOLEAN => '_bool',
-            'INVALID'           => 'INVALID'
-        );
-
-        $this->mapping->getMappings();
+        $this->mapping = new Mapping(array(
+            'strict'  => true,
+            'mapping' => array(
+                Field::TYPE_BOOLEAN => '_test',
+                'INVALID' => 'INVALID'
+            )
+        ));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid type for 'mapping' given. Expected 'Array', but got 'string'
-     */
-    public function testInvalidFieldType()
+    public function testGetMapping()
     {
-        $this->mapping->mapping = 'blah';
-        $this->mapping->getMappings();
+        $this->mapping = new Mapping(array(
+            'mapping' => array(
+                Field::TYPE_BOOLEAN => '_test',
+                Field::TYPE_DATE    => '_date'
+            )
+        ));
+
+        $this->assertEquals('_test', $this->mapping->getMapping(Field::TYPE_BOOLEAN));
+        $this->assertEquals('_date', $this->mapping->getMapping(Field::TYPE_DATE));
+
+        $this->assertNull($this->mapping->getMapping('INVALID'));
     }
 
-    /**
-     * @return array
-     */
-    public function getDefaultMapping()
+    public function testRestoreMapping()
     {
-        $return = array();
-        foreach (Mapping::getDefaultMapping() as $type => $suffix) {
-            $return[] = array($type, $suffix);
-        }
+        $this->mapping = new Mapping(array(
+            'mapping' => array(
+                Field::TYPE_BOOLEAN => '_test',
+                Field::TYPE_DATE    => '_date'
+            )
+        ));
 
-        return $return;
+        $this->mapping->restoreMapping();
+
+        $this->assertEquals($this->getDefaultMappingArray(), $this->mapping->getMappings());
     }
 
     /**

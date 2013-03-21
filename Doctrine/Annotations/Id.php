@@ -10,14 +10,15 @@
  */
 namespace TP\SolariumExtensionsBundle\Doctrine\Annotations;
 
-use Doctrine\Common\Annotations\Annotation;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation as BaseAnnotation;
 
 /**
  * Class Id
  *
  * @package TP\SolariumExtensionsBundle\Doctrine\Annotations
+ * @Annotation
  */
-class Id extends Annotation
+class Id extends BaseAnnotation
 {
     /**
      * Holds the default ID field for the Document

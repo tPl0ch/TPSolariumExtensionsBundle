@@ -33,6 +33,55 @@ class FieldTest extends \PHPUnit_Framework_TestCase
         $this->field = new Field(array('name' => 'testVariableName'));
     }
 
+    public function testDefaultType()
+    {
+        $this->assertEquals(Field::TYPE_STRING, $this->field->type);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Invalid field type 'INVALID' given, only
+     */
+    public function testInvalidFieldTypeException()
+    {
+        $this->field = new Field(array('type' => 'INVALID'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Required 'propertyAccess' parameter for multi valued type 'boolean_multi' is missing.
+     */
+    public function testMissingPropertyAccessForMultiField()
+    {
+        $this->field = new Field(array('type' => Field::TYPE_BOOLEAN_MULTI));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Parameter 'boost' must be a numeric value.
+     */
+    public function testInvalidBoostValue()
+    {
+        $this->field = new Field(array('boost' => 'foo'));
+    }
+
+    public function testField()
+    {
+        $this->field = new Field(array('type' => Field::TYPE_DATE, 'boost' => '23'));
+
+        $this->assertEquals(Field::TYPE_DATE, $this->field->type);
+        $this->assertEquals(23.0, $this->field->boost);
+        $this->assertNull($this->field->name);
+        $this->assertNull($this->field->propertyAccess);
+
+        $this->field = new Field(array('type' => Field::TYPE_DATE_MULTI, 'propertyAccess' => 'test'));
+
+        $this->assertEquals(Field::TYPE_DATE_MULTI, $this->field->type);
+        $this->assertEquals('test', $this->field->propertyAccess);
+        $this->assertEquals(0.0, $this->field->boost);
+        $this->assertNull($this->field->name);
+    }
+
     /**
      * Tests that the field type name mapping works as expected
      */
@@ -52,5 +101,23 @@ class FieldTest extends \PHPUnit_Framework_TestCase
 
         $this->field->useMapping = false;
         $this->assertEquals('testVariableName', $this->field->getFieldName($mapping));
+    }
+
+    public function testNameOverride()
+    {
+        $mapping = array(Field::TYPE_STRING => '_test');
+        $this->assertEquals('test_variable_name_test', $this->field->getFieldName($mapping));
+
+        $this->assertEquals('override_variable_name_test', $this->field->getFieldName($mapping, 'OverrideVariableName'));
+    }
+
+    /**
+     * @expectedException \LogicException
+     * @expectedExceptionMessage No field name found.
+     */
+    public function testExceptionNoName()
+    {
+        $this->field->name = null;
+        $this->field->getFieldName(array(Field::TYPE_STRING => '_test'));
     }
 }

@@ -32,12 +32,12 @@ class NelmioConfigSnifferPass implements CompilerPassInterface
         $configs = $container->getExtensionConfig('nelmio_solarium');
         $config = $processor->processConfiguration(new Configuration(), $configs);
 
-        $manager = $container->getDefinition('solarium.service_manager');
+        $manager = $container->getDefinition('solarium_extensions.service_manager');
         foreach ($config['clients'] as $name => $clientOptions) {
             $id = sprintf('solarium.client.%s', $name);
             $manager->addMethodCall('setClient', array(new Reference($id), $id));
         }
 
-        $container->setDefinition('solarium.service_manager', $manager);
+        $container->setDefinition('solarium_extensions.service_manager', $manager);
     }
 }

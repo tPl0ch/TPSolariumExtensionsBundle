@@ -10,7 +10,7 @@
  */
 namespace TP\SolariumExtensionsBundle\Doctrine\Annotations;
 
-use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Annotation as BaseAnnotation;
 use Doctrine\Common\Inflector\Inflector;
 
 /**
@@ -19,7 +19,7 @@ use Doctrine\Common\Inflector\Inflector;
  * @package TP\SolariumExtensionsBundle\Doctrine\Annotations
  * @Annotation
  */
-class Field extends Annotation
+class Field extends BaseAnnotation
 {
     /**
      * Default field constants
@@ -43,22 +43,6 @@ class Field extends Annotation
     const TYPE_DATE          = 'date';
     const TYPE_DATE_MULTI    = 'date_multi';
     const TYPE_LOCATION      = 'location';
-
-    /**
-     * Holds the field types that are multiValued
-     *
-     * @var array
-     */
-    private $multiFields = array(
-        self::TYPE_INT_MULTI,
-        self::TYPE_STRING_MULTI,
-        self::TYPE_LONG_MULTI,
-        self::TYPE_TEXT_MULTI,
-        self::TYPE_BOOLEAN_MULTI,
-        self::TYPE_FLOAT_MULTI,
-        self::TYPE_DOUBLE_MULTI,
-        self::TYPE_DATE_MULTI,
-    );
 
     /**
      * @return array
@@ -121,9 +105,14 @@ class Field extends Annotation
     /**
      * The field boost that should be set to this field.
      *
-     * @var int
+     * @var double
      */
-    public $boost = 0;
+    public $boost = 0.0;
+
+    /**
+     * @var string
+     */
+    public $propertyAccess;
 
     /**
      * Indicates if the MappingTable should be used to generate the field name.
@@ -142,15 +131,62 @@ class Field extends Annotation
     public $inflect = true;
 
     /**
+     * @param array $options
+     */
+    public function __construct(Array $options)
+    {
+        if (isset($options['type'])) {
+            if (!$this->isValidType($options['type'])) {
+                $message = "Invalid field type '%s' given, only %s are allowed.";
+
+                throw new \InvalidArgumentException(
+                    sprintf($message, $options['type'], implode(',', self::getFieldTypes()))
+                );
+            }
+
+            $this->type = $options['type'];
+
+            if ($this->isMultiValuedType($options['type'])) {
+                if (!isset($options['propertyAccess'])) {
+                    $message = "Required 'propertyAccess' parameter for multi valued type '%s' is missing.";
+
+                    throw new \InvalidArgumentException(sprintf($message, $options['type']));
+                }
+
+                $this->propertyAccess = $options['propertyAccess'];
+            }
+        }
+
+        if (isset($options['boost'])) {
+            if (!is_numeric($options['boost'])) {
+                throw new \InvalidArgumentException("Parameter 'boost' must be a numeric value.");
+            }
+
+            $this->boost = floatval($options['boost']);
+        }
+
+        if (isset($options['name'])) {
+            $this->name = (string) $options['name'];
+        }
+    }
+
+    /**
      * Creates a given field name with given settings.
      *
-     * @param array $mapping
+     * @param array  $mapping
+     * @param string $name
      *
      * @return string
      */
-    public function getFieldName(Array &$mapping)
+    public function getFieldName(Array $mapping, $name = null)
     {
-        $name = $this->name;
+        if (!$name && !$this->name) {
+            throw new \LogicException("No field name found.");
+        }
+
+        if (!$name) {
+            $name = $this->name;
+        }
 
         if ($this->inflect) {
             $name = Inflector::tableize($name);
