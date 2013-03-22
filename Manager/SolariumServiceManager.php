@@ -93,6 +93,8 @@ class SolariumServiceManager
     public function doUpdate()
     {
         foreach ($this->updateStack as $service => $update) {
+            $update->addCommit();
+
             $client = $this->getClient($service);
             $client->update($update);
         }

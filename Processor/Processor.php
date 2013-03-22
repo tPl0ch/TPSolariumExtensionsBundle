@@ -229,7 +229,6 @@ class Processor
         }
 
         $query->addDocument($document, $update, $commitWithin);
-        $query->addCommit();
     }
 
     /**

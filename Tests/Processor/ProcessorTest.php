@@ -51,34 +51,60 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->processor = new Processor($factory, $manager, PropertyAccess::getPropertyAccessor());
     }
 
-    public function testProcessing()
+    public function testProcessingSave()
     {
         $object = new AnnotationStub1();
 
         $mockClientOne = $this->getMockBuilder('Solarium\Client')->getMock();
-        $mockClientTwo = $this->getMockBuilder('Solarium\Client')->getMock();
 
         $queryOne = new Query();
-        $queryTwo = new Query();
 
         $mockClientOne->expects($this->once())
             ->method('createUpdate')
             ->will($this->returnValue($queryOne))
         ;
 
-        $mockClientTwo->expects($this->once())
-            ->method('createUpdate')
-            ->will($this->returnValue($queryTwo))
-        ;
-
         $this->processor->getServiceManager()->setClient($mockClientOne, 'solarium.client.save');
-        $this->processor->getServiceManager()->setClient($mockClientTwo, 'solarium.client.update');
 
         $this->processor->process($object, Operation::OPERATION_SAVE);
-        $this->processor->process($object, Operation::OPERATION_UPDATE);
 
-        
+        $commands = $queryOne->getCommands();
 
+        $this->assertCount(1, $commands);
+        $this->assertInstanceOf('Solarium\QueryType\Update\Query\Command\Add', $commands[0]);
+
+        $documents = $commands[0]->getDocuments();
+
+        $this->assertCount(1, $documents);
+        $this->assertInstanceOf('Solarium\QueryType\Update\Query\Document\Document', $documents[0]);
+
+        $this->assertEquals(1423, $documents[0]->custom_id);
+        $this->assertEquals('string', $documents[0]->string_s);
+        $this->assertEquals('boosted_string', $documents[0]->boosted_field_s);
+        $this->assertEquals(2.3, $documents[0]->getFieldBoost('boosted_field_s'));
+        $this->assertEquals('inflectedNoMapping', $documents[0]->inflected_no_mapping);
+        $this->assertEquals('mappedNoInflection', $documents[0]->mappedNoInflection_s);
+        $this->assertEquals('noMappingNoInflection', $documents[0]->noMappingNoInflection);
+        $this->assertEquals('customName', $documents[0]->my_custom_name_s);
+        $this->assertFalse($documents[0]->bool_b);
+        $this->assertEquals(array('test0', 'test1', 'test2'), $documents[0]->collection_tmulti);
+        $this->assertEquals('2012-03-24T00:00:00Z', $documents[0]->date_dt);
+        $expected = array(
+            '2010-04-24T00:00:00Z',
+            '2011-04-24T00:00:00Z',
+            '2012-04-24T00:00:00Z'
+        );
+        $this->assertEquals($expected, $documents[0]->date_collection_dts);
+
+        $finalQuery = clone $queryOne;
+        $finalQuery->addCommit();
+
+        $mockClientOne->expects($this->once())
+            ->method('update')
+            ->with($finalQuery)
+        ;
+
+        $this->processor->flush();
     }
 
     public function testNeedsProcessing()
