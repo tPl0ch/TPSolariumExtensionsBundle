@@ -86,6 +86,6 @@ class DoctrineListener
      */
     public function postFlush(LifecycleEventArgs $args)
     {
-        $this->getProcessor()->getServiceManager()->doUpdate();
+        $this->getProcessor()->flush();
     }
 }

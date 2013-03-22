@@ -107,6 +107,8 @@ class SolariumServiceManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($updateOne, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_SAVE));
         $this->assertSame($updateTwo, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_UPDATE));
 
+        $this->assertNull($this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_DELETE));
+
         // Call update handler for all open update documents
         $this->manager->doUpdate();
     }

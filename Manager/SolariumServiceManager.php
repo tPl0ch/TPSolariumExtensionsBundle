@@ -96,5 +96,7 @@ class SolariumServiceManager
             $client = $this->getClient($service);
             $client->update($update);
         }
+
+        $this->updateStack = array();
     }
 }

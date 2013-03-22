@@ -143,6 +143,14 @@ class Processor
     }
 
     /**
+     * @return void
+     */
+    public function flush()
+    {
+        $this->getServiceManager()->doUpdate();
+    }
+
+    /**
      * @param object $object
      * @param bool   $update
      * @param bool   $commitWithin
