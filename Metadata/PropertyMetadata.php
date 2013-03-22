@@ -19,23 +19,44 @@ use Metadata\PropertyMetadata as BasePropertyMetadata;
  */
 class PropertyMetadata extends BasePropertyMetadata
 {
+    /**
+     * @var string
+     */
     public $fieldName;
+
+    /**
+     * @var string
+     */
     public $type;
+
+    /**
+     * @var double
+     */
     public $boost;
+
+    /**
+     * @var string
+     */
     public $propertyAccess;
+
+    /**
+     * @var bool
+     */
     public $multi;
 
     public function serialize()
     {
-        return serialize(array(
-            $this->class,
-            $this->name,
-            $this->fieldName,
-            $this->type,
-            $this->boost,
-            $this->propertyAccess,
-            $this->multi
-        ));
+        return serialize(
+            array(
+                $this->class,
+                $this->name,
+                $this->fieldName,
+                $this->type,
+                $this->boost,
+                $this->propertyAccess,
+                $this->multi
+            )
+        );
     }
 
     public function unserialize($str)

@@ -19,9 +19,24 @@ use Metadata\ClassMetadata as BaseClassMetadata;
  */
 class ClassMetadata extends BaseClassMetadata
 {
+    /**
+     * @var array
+     */
     public $operations = array();
+
+    /**
+     * @var array
+     */
     public $mappingTable = array();
+
+    /**
+     * @var float
+     */
     public $boost = 0.0;
+
+    /**
+     * @var string
+     */
     public $id;
 
     /**
@@ -29,17 +44,19 @@ class ClassMetadata extends BaseClassMetadata
      */
     public function serialize()
     {
-        return serialize(array(
-            $this->name,
-            $this->methodMetadata,
-            $this->propertyMetadata,
-            $this->fileResources,
-            $this->createdAt,
-            $this->operations,
-            $this->mappingTable,
-            $this->boost,
-            $this->id
-        ));
+        return serialize(
+            array(
+                $this->name,
+                $this->methodMetadata,
+                $this->propertyMetadata,
+                $this->fileResources,
+                $this->createdAt,
+                $this->operations,
+                $this->mappingTable,
+                $this->boost,
+                $this->id
+            )
+        );
     }
 
     /**
