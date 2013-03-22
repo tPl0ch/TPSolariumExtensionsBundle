@@ -35,7 +35,7 @@ class AnnotationStub1
     /**
      * @var int
      *
-     * @Solarium\Id("custom_id")
+     * @Solarium\Id("custom_id", propertyAccess="id")
      */
     public $id = 1423;
 
@@ -89,11 +89,25 @@ class AnnotationStub1
     public $bool = false;
 
     /**
-     * @var string
+     * @var ArrayCollection
      *
      * @Solarium\Field(type="text_multi", propertyAccess="multiName")
      */
     public $collection;
+
+    /**
+     * @var \DateTime
+     *
+     * @Solarium\Field(type="date")
+     */
+    public $date;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @Solarium\Field(type="date_multi", propertyAccess="__raw__")
+     */
+    public $dateCollection;
 
     /**
      * Constructor
@@ -101,12 +115,17 @@ class AnnotationStub1
     public function __construct()
     {
         $this->collection = new ArrayCollection();
+        $this->dateCollection = new ArrayCollection();
 
         for ($i = 0; $i < 3; $i++) {
             $object = new \stdClass();
             $object->multiName = "test$i";
 
             $this->collection->add($object);
+
+            $this->dateCollection->add(new \DateTime("201{$i}-04-24", new \DateTimeZone('UTC')));
         }
+
+        $this->date = new \DateTime('2012-03-24', new \DateTimeZone('UTC'));
     }
 }

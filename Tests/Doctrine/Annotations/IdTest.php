@@ -37,6 +37,7 @@ class IdTest extends \PHPUnit_Framework_TestCase
     public function testDefaultName()
     {
         $this->assertEquals('id', $this->id->name);
+        $this->assertEquals('id', $this->id->propertyAccess);
     }
 
     public function testValueSetting()
@@ -55,5 +56,14 @@ class IdTest extends \PHPUnit_Framework_TestCase
     {
         $this->id = new Id(array('value' => 'test', 'name' => 'test_two'));
         $this->assertEquals('test', $this->id->name);
+    }
+
+    public function testPropertyAccess()
+    {
+        $this->id = new Id(array('name' => 'test'));
+        $this->assertEquals('test', $this->id->propertyAccess);
+
+        $this->id = new Id(array('name' => 'test', 'propertyAccess' => 'access'));
+        $this->assertEquals('access', $this->id->propertyAccess);
     }
 }

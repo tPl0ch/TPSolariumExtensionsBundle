@@ -28,6 +28,11 @@ class Id extends BaseAnnotation
     public $name;
 
     /**
+     * @var string
+     */
+    public $propertyAccess;
+
+    /**
      * @param array $options
      */
     public function __construct(Array $options)
@@ -38,6 +43,12 @@ class Id extends BaseAnnotation
             $this->name = (string) $options['name'];
         } else {
             $this->name = 'id';
+        }
+
+        if (isset($options['propertyAccess'])) {
+            $this->propertyAccess = (string) $options['propertyAccess'];
+        } else {
+            $this->propertyAccess = $this->name;
         }
     }
 }

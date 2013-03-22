@@ -12,17 +12,21 @@ namespace TP\SolariumExtensionsBundle\Tests\Metadata;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 
+use Solarium\Client;
+
+use Solarium\QueryType\Update\Query\Query;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
 use TP\SolariumExtensionsBundle\Metadata\Driver\AnnotationDriver;
 use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
 use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub1;
+use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub2;
 use TP\SolariumExtensionsBundle\Processor\Processor;
 
 use Metadata\MetadataFactory;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub2;
+
 
 /**
  * Class ProcessorTest
@@ -45,6 +49,36 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $manager = new SolariumServiceManager();
 
         $this->processor = new Processor($factory, $manager, PropertyAccess::getPropertyAccessor());
+    }
+
+    public function testProcessing()
+    {
+        $object = new AnnotationStub1();
+
+        $mockClientOne = $this->getMockBuilder('Solarium\Client')->getMock();
+        $mockClientTwo = $this->getMockBuilder('Solarium\Client')->getMock();
+
+        $queryOne = new Query();
+        $queryTwo = new Query();
+
+        $mockClientOne->expects($this->once())
+            ->method('createUpdate')
+            ->will($this->returnValue($queryOne))
+        ;
+
+        $mockClientTwo->expects($this->once())
+            ->method('createUpdate')
+            ->will($this->returnValue($queryTwo))
+        ;
+
+        $this->processor->getServiceManager()->setClient($mockClientOne, 'solarium.client.save');
+        $this->processor->getServiceManager()->setClient($mockClientTwo, 'solarium.client.update');
+
+        $this->processor->process($object, Operation::OPERATION_SAVE);
+        $this->processor->process($object, Operation::OPERATION_UPDATE);
+
+        
+
     }
 
     public function testNeedsProcessing()

@@ -118,6 +118,8 @@ class AnnotationDriver implements DriverInterface
 
             if (null !== $annotation) {
                 $classMetadata->id = $annotation->name;
+                $classMetadata->idPropertyAccess = $annotation->propertyAccess;
+
                 if (true === $hasIdField) {
                     $message = "Duplicate Id field declaration for class '%s' found.";
                     throw new \LogicException(sprintf($message, $classMetadata->reflection->getName()));

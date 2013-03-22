@@ -70,6 +70,7 @@ class AnnotationDriverTest extends \PHPUnit_Framework_TestCase
     public function testClassAnnotationParsing()
     {
         $this->assertEquals('custom_id', $this->metadata->id);
+        $this->assertEquals('id', $this->metadata->idPropertyAccess);
         $this->assertEquals(2.4, $this->metadata->boost);
         $expected = array(
             Operation::OPERATION_SAVE => 'solarium.client.save',

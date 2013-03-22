@@ -41,6 +41,11 @@ class ClassMetadata extends BaseClassMetadata
     public $id;
 
     /**
+     * @var string
+     */
+    public $idPropertyAccess;
+
+    /**
      * @return string
      */
     public function serialize()
@@ -55,7 +60,8 @@ class ClassMetadata extends BaseClassMetadata
                 $this->operations,
                 $this->mappingTable,
                 $this->boost,
-                $this->id
+                $this->id,
+                $this->idPropertyAccess
             )
         );
     }
@@ -74,7 +80,8 @@ class ClassMetadata extends BaseClassMetadata
             $this->operations,
             $this->mappingTable,
             $this->boost,
-            $this->id
+            $this->id,
+            $this->idPropertyAccess
             ) = unserialize($str);
 
         $this->reflection = new \ReflectionClass($this->name);

@@ -15,12 +15,14 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Metadata\MetadataFactoryInterface;
 
 use Solarium\QueryType\Update\Query\Query;
+
 use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
+use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
 
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
 
 /**
  * Class Processor
@@ -58,6 +60,18 @@ class Processor
         $this->metadataFactory  = $metadataFactory;
         $this->serviceManager   = $serviceManager;
         $this->propertyAccessor = $propertyAccessor;
+    }
+
+    /**
+     * @param \DateTime $date
+     *
+     * @return string
+     */
+    public static function makeSolrTime(\DateTime $date)
+    {
+        $date->setTimezone(new \DateTimeZone('UTC'));
+
+        return $date->format('Y-m-d\TH:i:s\Z');
     }
 
     /**
@@ -152,12 +166,13 @@ class Processor
 
     /**
      * @param object $object
-     * @param bool   $update
-     * @param bool   $commitWithin
+     * @param bool $update
+     * @param bool $commitWithin
      *
+     * @throws \InvalidArgumentException
      * @return void
      */
-    protected function processSave($object, $update = true, $commitWithin = false)
+    protected function processSave($object, $update = false, $commitWithin = false)
     {
         $operation = Operation::OPERATION_SAVE;
 
@@ -172,7 +187,10 @@ class Processor
 
         /** @var \Solarium\QueryType\Update\Query\Document\Document $document */
         $document->setBoost($classMetadata->boost);
-        $document->addField($classMetadata->id, $object->getId());
+        $document->addField(
+            $classMetadata->id,
+            $this->getPropertyAccessor()->getValue($object, $classMetadata->idPropertyAccess)
+        );
 
         /** @var \TP\SolariumExtensionsBundle\Metadata\PropertyMetadata $property */
         foreach ($classMetadata->propertyMetadata as $property) {
@@ -184,17 +202,27 @@ class Processor
 
                     throw new \InvalidArgumentException(sprintf($message, $property->name));
                 }
-                
+
                 foreach ($property->getValue($object) as $item) {
                     if ($property->propertyAccess === PropertyMetadata::TYPE_RAW) {
                         $value = $item;
                     } else {
                         $value = $this->getPropertyAccessor()->getValue($item, $property->propertyAccess);
                     }
+
+                    if ($property->type === Field::TYPE_DATE_MULTI) {
+                        $value = $this->checkDateField($value);
+                    }
+
                     $document->addField($property->fieldName, $value);
                 }
             } else {
-                $document->addField($property->fieldName, $property->getValue($object));
+                $value = $property->getValue($object);
+
+                if ($property->type === Field::TYPE_DATE) {
+                    $value = $this->checkDateField($value);
+                }
+                $document->addField($property->fieldName, $value);
             }
 
             $document->setFieldBoost($property->fieldName, $property->boost);
@@ -216,5 +244,24 @@ class Processor
         $query = $this->getServiceManager()->getUpdateQuery($classMetadata, Operation::OPERATION_DELETE);
         $query->addDeleteById($object->getId());
         $query->addCommit();
+    }
+
+    /**
+     * @param $value
+     *
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    private function checkDateField($value)
+    {
+        if (!$value instanceof \DateTime) {
+            $type    = gettype($value);
+            $message = "Property '%s' must be of type \\DateTime, '%s' given.";
+
+            throw new \InvalidArgumentException(sprintf($message, $type));
+        }
+
+        return self::makeSolrTime($value);
     }
 }

@@ -41,6 +41,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertClassHasAttribute('boost', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
         $this->assertClassHasAttribute('id', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
         $this->assertClassHasAttribute('mappingTable', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
+        $this->assertClassHasAttribute('idPropertyAccess', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
     }
 
     public function testDefaultValues()
@@ -54,6 +55,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(), $this->metadata->operations);
         $this->assertEquals(array(), $this->metadata->mappingTable);
         $this->assertNull($this->metadata->id);
+        $this->assertNull($this->metadata->idPropertyAccess);
     }
 
     public function testSerializing()
@@ -62,6 +64,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->metadata->boost = 2.4;
         $this->metadata->mappingTable = array('test' => 'test');
         $this->metadata->id = 'test_id';
+        $this->metadata->idPropertyAccess = 'test_access';
 
         $serialized = $this->metadata->serialize();
 
@@ -72,6 +75,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2.4, $this->metadata->boost);
         $this->assertEquals(array('test' => 'test'), $this->metadata->mappingTable);
         $this->assertEquals('test_id', $this->metadata->id);
+        $this->assertEquals('test_access', $this->metadata->idPropertyAccess);
     }
 
     public function testHasOperation()

@@ -19,7 +19,7 @@ use Metadata\PropertyMetadata as BasePropertyMetadata;
  */
 class PropertyMetadata extends BasePropertyMetadata
 {
-    const TYPE_RAW = 'raw';
+    const TYPE_RAW = '__raw__';
 
     /**
      * @var string
