@@ -3,23 +3,42 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
     <parameters>
+        <parameter key="solarium_extensions.annotations_reader.class">Doctrine\Common\Annotations\AnnotationReader</parameter>
         <parameter key="solarium_extensions.service_manager.class">TP\SolariumExtensionsBundle\Manager\SolariumServiceManager</parameter>
-        <parameter key="solarium_extensions.driver.class">TP\SolariumExtensionsBundle\Doctrine\Annotations\Driver\SolariumDriver</parameter>
+        <parameter key="solarium_extensions.processor.class">TP\SolariumExtensionsBundle\Processor\Processor</parameter>
         <parameter key="solarium_extensions.doctrine_listener.class">TP\SolariumExtensionsBundle\EventListener\DoctrineListener</parameter>
+        <parameter key="solarium_extensions.metadata_factory.class">Metadata\MetadataFactory</parameter>
+        <parameter key="solarium_extensions.metadata.annotation_driver.class">TP\SolariumExtensionsBundle\Metadata\Driver\AnnotationDriver</parameter>
     </parameters>
+
     <services>
+
         <service id="solarium_extensions.service_manager" class="%solarium_extensions.service_manager.class%" />
-        <service id="solarium_extensions.annotations_reader" class="Doctrine\Common\Annotations\AnnotationReader" />
-        <service id="solarium_extensions.driver" class="%solarium_extensions.driver.class%">
+
+        <service id="solarium_extensions.annotations_reader" class="%solarium_extensions.annotations_reader.class%" />
+
+        <service id="solarium_extensions.metadata.annotation_driver" class="%solarium_extensions.metadata.annotation_driver.class%" public="false">
             <argument type="service" id="solarium_extensions.annotations_reader" />
         </service>
+
+        <service id="solarium_extensions.metadata_factory" class="%solarium_extensions.metadata_factory.class%" public="false">
+            <argument type="service" id="solarium_extensions.metadata.annotation_driver" />
+        </service>
+
+        <service id="solarium_extensions.processor" class="%solarium_extensions.processor.class%">
+            <argument type="service" id="solarium_extensions.metadata_factory" />
+            <argument type="service" id="solarium_extensions.service_manager" />
+        </service>
+
         <service id="solarium_extensions.doctrine_listener" class="%solarium_extensions.doctrine_listener.class%">
-            <argument type="service" id="solarium_extensions.driver" />
+            <argument type="service" id="solarium_extensions.processor" />
             <tag name="doctrine.event_listener" event="postPersist" method="postPersist"/>
             <tag name="doctrine.event_listener" event="postRemove" method="postRemove"/>
             <tag name="doctrine.event_listener" event="postUpdate" method="postUpdate"/>
             <tag name="doctrine.event_listener" event="onFlush" method="onFlush"/>
         </service>
+
     </services>
 </container>

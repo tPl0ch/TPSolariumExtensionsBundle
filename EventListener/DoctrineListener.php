@@ -11,7 +11,7 @@
 namespace TP\SolariumExtensionsBundle\EventListener;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
-use TP\SolariumExtensionsBundle\Doctrine\Annotations\SolariumDriver;
+use TP\SolariumExtensionsBundle\Processor\Processor;
 
 /**
  * Class DoctrineListener
@@ -21,15 +21,15 @@ use TP\SolariumExtensionsBundle\Doctrine\Annotations\SolariumDriver;
 class DoctrineListener
 {
     /**
-     * @var \TP\SolariumExtensionsBundle\Doctrine\Annotations\SolariumDriver
+     * @var \TP\SolariumExtensionsBundle\Processor\Processor
      */
-    private $driver;
+    private $processor;
 
     /**
-     * @param SolariumDriver $driver
+     * @param Processor $processor
      */
-    public function __construct(SolariumDriver $driver)
+    public function __construct(Processor $processor)
     {
-        $this->driver = $driver;
+        $this->processor = $processor;
     }
 }
