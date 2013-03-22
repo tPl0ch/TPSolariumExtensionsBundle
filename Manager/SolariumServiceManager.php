@@ -63,7 +63,7 @@ class SolariumServiceManager
      * @param ClassMetadata $classMetadata
      * @param $operation
      *
-     * @return null
+     * @return \Solarium\QueryType\Update\Query\Query
      */
     public function getUpdateQuery(ClassMetadata $classMetadata, $operation)
     {

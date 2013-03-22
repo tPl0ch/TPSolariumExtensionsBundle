@@ -12,8 +12,10 @@ namespace TP\SolariumExtensionsBundle\EventListener;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
+use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
 use TP\SolariumExtensionsBundle\Processor\Processor;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use TP\SolariumExtensionsBundle\Tests\Metadata\PropertyMetadataTest;
 
 /**
  * Class DoctrineListener
@@ -43,51 +45,47 @@ class DoctrineListener
         return $this->processor;
     }
 
+    /**
+     * @param LifecycleEventArgs $args
+     */
     public function postPersist(LifecycleEventArgs $args)
     {
         $object = $args->getObject();
-        $classMetadata = $this->processor->getClassMetadata($object);
 
-        if (null === $classMetadata) {
-            return null;
+        if ($this->processor->needsProcessing($object, Operation::OPERATION_SAVE)) {
+            $this->processor->process($object, Operation::OPERATION_SAVE);
         }
+    }
 
-        if (array_key_exists(Operation::OPERATION_ALL, $classMetadata->operations)) {
-            $service = $classMetadata->operations[Operation::OPERATION_ALL];
-        } elseif (array_key_exists(Operation::OPERATION_SAVE, $classMetadata->operations)) {
-            $service = $classMetadata->operations[Operation::OPERATION_SAVE];
-        } else {
-            return null;
+    /**
+     * @param LifecycleEventArgs $args
+     */
+    public function postUpdate(LifecycleEventArgs $args)
+    {
+        $object = $args->getObject();
+
+        if ($this->processor->needsProcessing($object, Operation::OPERATION_UPDATE)) {
+            $this->processor->process($object, Operation::OPERATION_UPDATE);
         }
+    }
 
-        $accessor = PropertyAccess::getPropertyAccessor();
+    /**
+     * @param LifecycleEventArgs $args
+     */
+    public function postDelete(LifecycleEventArgs $args)
+    {
+        $object = $args->getObject();
 
-        $client = $this->processor
-            ->getServiceManager()
-            ->getClient($service)
-        ;
-        $update = $client->createUpdate();
-        /** @var \Solarium\QueryType\Update\Query\Document\Document $document */
-        $document = $update->createDocument();
-        $document->setBoost($classMetadata->boost);
-        $document->addField($classMetadata->id, $object->getId());
-
-        /** @var \TP\SolariumExtensionsBundle\Metadata\PropertyMetadata $property */
-        foreach ($classMetadata->propertyMetadata as $property) {
-            if (true === $property->multi) {
-                foreach ($property->getValue($object) as $item) {
-                    $document->addField($property->fieldName, $accessor->getValue($item, $property->propertyAccess));
-                }
-            } else {
-                $document->addField($property->fieldName, $property->getValue($object));
-            }
-
-            $document->setFieldBoost($property->fieldName, $property->boost);
+        if ($this->processor->needsProcessing($object, Operation::OPERATION_DELETE)) {
+            $this->processor->process($object, Operation::OPERATION_DELETE);
         }
+    }
 
-        $update->addDocument($document);
-        $update->addCommit();
-
-        $client->update($update);
+    /**
+     * @param LifecycleEventArgs $args
+     */
+    public function postFlush(LifecycleEventArgs $args)
+    {
+        $this->getProcessor()->getServiceManager()->doUpdate();
     }
 }

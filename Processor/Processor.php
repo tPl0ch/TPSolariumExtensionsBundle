@@ -14,11 +14,13 @@ use Doctrine\Common\Annotations\AnnotationReader;
 
 use Metadata\MetadataFactoryInterface;
 
+use Solarium\QueryType\Update\Query\Query;
 use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
 
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
 
 /**
  * Class Processor
@@ -108,5 +110,95 @@ class Processor
         return $this->getClassMetadata($object)
             ->hasOperation($operation)
         ;
+    }
+
+    /**
+     * Processes the index for the given object and the given operation
+     *
+     * @param object $object
+     * @param string $operation
+     * @param bool   $instantCommit
+     *
+     * @return bool
+     */
+    public function process($object, $operation, $instantCommit = false)
+    {
+        if (!$this->needsProcessing($object, $operation)) {
+            return false;
+        }
+
+        switch ($operation) {
+            case Operation::OPERATION_SAVE:
+                $this->processSave($object, false, $instantCommit);
+                break;
+            case Operation::OPERATION_UPDATE:
+                $this->processSave($object, true, $instantCommit);
+                break;
+            case Operation::OPERATION_DELETE:
+                $this->processDelete($object);
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param object $object
+     * @param bool   $update
+     * @param bool   $commitWithin
+     *
+     * @return void
+     */
+    protected function processSave($object, $update = true, $commitWithin = false)
+    {
+        $operation = Operation::OPERATION_SAVE;
+
+        if (true === $update) {
+            $operation = Operation::OPERATION_UPDATE;
+        }
+
+        $classMetadata = $this->getClassMetadata($object);
+
+        $query    = $this->getServiceManager()->getUpdateQuery($classMetadata, $operation);
+        $document = $query->createDocument();
+
+        /** @var \Solarium\QueryType\Update\Query\Document\Document $document */
+        $document->setBoost($classMetadata->boost);
+        $document->addField($classMetadata->id, $object->getId());
+
+        /** @var \TP\SolariumExtensionsBundle\Metadata\PropertyMetadata $property */
+        foreach ($classMetadata->propertyMetadata as $property) {
+            if (true === $property->multi) {
+                foreach ($property->getValue($object) as $item) {
+                    if ($property->propertyAccess === PropertyMetadata::TYPE_RAW) {
+                        $value = $item;
+                    } else {
+                        $value = $this->getPropertyAccessor()->getValue($item, $property->propertyAccess);
+                    }
+                    $document->addField($property->fieldName, $value);
+                }
+            } else {
+                $document->addField($property->fieldName, $property->getValue($object));
+            }
+
+            $document->setFieldBoost($property->fieldName, $property->boost);
+        }
+
+        $query->addDocument($document, $update, $commitWithin);
+        $query->addCommit();
+    }
+
+    /**
+     * Deletes a document from the index
+     *
+     * @param $object
+     */
+    protected function processDelete($object)
+    {
+        $classMetadata = $this->getClassMetadata($object);
+
+        $query = $this->getServiceManager()->getUpdateQuery($classMetadata, Operation::OPERATION_DELETE);
+        $query->addDeleteById($object->getId());
+        $query->addCommit();
     }
 }
