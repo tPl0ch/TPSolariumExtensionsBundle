@@ -21,6 +21,7 @@ use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub1;
 use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub2;
 use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub4;
 use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub5;
+use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub6;
 
 
 /**
@@ -46,6 +47,24 @@ class AnnotationDriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->driver = new AnnotationDriver(new AnnotationReader());
         $this->metadata = $this->driver->loadMetadataForClass(new \ReflectionClass(new AnnotationStub1()));
+    }
+
+    public function testClassAnnotationClasses()
+    {
+        $expected = array(
+            AnnotationDriver::ANNOTATION_DOCUMENT,
+            AnnotationDriver::ANNOTATION_MAPPING
+        );
+        $this->assertEquals($expected, AnnotationDriver::getClassAnnotationClasses());
+    }
+
+    public function testPropertyAnnotationClasses()
+    {
+        $expected = array(
+            AnnotationDriver::ANNOTATION_FIELD,
+            AnnotationDriver::ANNOTATION_ID
+        );
+        $this->assertEquals($expected, AnnotationDriver::getPropertyAnnotationClasses());
     }
 
     public function testClassAnnotationParsing()
@@ -103,6 +122,15 @@ class AnnotationDriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->metadata = $this->driver->loadMetadataForClass(new \ReflectionClass(new AnnotationStub2()));
         $this->assertEquals(Mapping::getDefaultMapping(), $this->metadata->mappingTable);
+    }
+
+    public function testNoDocumentAnnotation()
+    {
+        $this->metadata = $this->driver->loadMetadataForClass(new \ReflectionClass(new AnnotationStub6()));
+        $this->assertEmpty($this->metadata->operations);
+        $this->assertEmpty($this->metadata->mappingTable);
+        $this->assertNull($this->metadata->id);
+        $this->assertEquals(0.0, $this->metadata->boost);
     }
 
     /**
