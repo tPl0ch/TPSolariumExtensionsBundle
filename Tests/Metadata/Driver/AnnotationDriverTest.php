@@ -127,10 +127,7 @@ class AnnotationDriverTest extends \PHPUnit_Framework_TestCase
     public function testNoDocumentAnnotation()
     {
         $this->metadata = $this->driver->loadMetadataForClass(new \ReflectionClass(new AnnotationStub6()));
-        $this->assertEmpty($this->metadata->operations);
-        $this->assertEmpty($this->metadata->mappingTable);
-        $this->assertNull($this->metadata->id);
-        $this->assertEquals(0.0, $this->metadata->boost);
+        $this->assertNull($this->metadata);
     }
 
     /**

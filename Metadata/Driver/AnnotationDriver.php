@@ -88,7 +88,7 @@ class AnnotationDriver implements DriverInterface
         );
 
         if (null === $annotation) {
-            return $classMetadata;
+            return null;
         }
 
         $this->setDocumentDataToClassMetadata($annotation, $classMetadata);

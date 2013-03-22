@@ -25,6 +25,11 @@ class SolariumServiceManager
     private $clients = array();
 
     /**
+     * @var array
+     */
+    private $updateStack = array();
+
+    /**
      * @param Client $client
      * @param string $id
      *
@@ -52,4 +57,5 @@ class SolariumServiceManager
 
         return $this->clients[$id];
     }
+
 }
