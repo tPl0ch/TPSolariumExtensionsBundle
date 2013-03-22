@@ -11,6 +11,7 @@
 namespace TP\SolariumExtensionsBundle\Metadata;
 
 use Metadata\ClassMetadata as BaseClassMetadata;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 
 /**
  * Class ClassMetadata
@@ -77,5 +78,37 @@ class ClassMetadata extends BaseClassMetadata
             ) = unserialize($str);
 
         $this->reflection = new \ReflectionClass($this->name);
+    }
+
+    /**
+     * @param string $operation
+     *
+     * @return bool
+     */
+    public function hasOperation($operation)
+    {
+        if (array_key_exists(Operation::OPERATION_ALL, $this->operations)) {
+            return true;
+        }
+
+        return array_key_exists($operation, $this->operations);
+    }
+
+    /**
+     * @param string $operation
+     *
+     * @return null
+     */
+    public function getServiceId($operation)
+    {
+        if (!$this->hasOperation($operation)) {
+            return null;
+        }
+
+        if ($this->hasOperation(Operation::OPERATION_ALL)) {
+            return $this->operations[Operation::OPERATION_ALL];
+        }
+
+        return $this->operations[$operation];
     }
 }
