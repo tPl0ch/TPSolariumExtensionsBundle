@@ -10,6 +10,8 @@
  */
 namespace TP\SolariumExtensionsBundle\Processor;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+
 use Metadata\MetadataFactoryInterface;
 
 use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
@@ -41,16 +43,6 @@ class Processor
     private $propertyAccessor;
 
     /**
-     * @var \TP\SolariumExtensionsBundle\Metadata\ClassMetadata
-     */
-    private $currentOperation;
-
-    /**
-     * @var array
-     */
-    private $commitStack;
-
-    /**
      * @param MetadataFactoryInterface $metadataFactory
      * @param SolariumServiceManager $serviceManager
      * @param PropertyAccessor $propertyAccessor
@@ -64,8 +56,6 @@ class Processor
         $this->metadataFactory  = $metadataFactory;
         $this->serviceManager   = $serviceManager;
         $this->propertyAccessor = $propertyAccessor;
-        $this->commitStack      = array();
-        $this->currentOperation = null;
     }
 
     /**
@@ -91,7 +81,10 @@ class Processor
      */
     public function getClassMetadata($entity)
     {
-        return $this->getMetadataFactory()->getMetadataForClass($entity);
+        return $this->getMetadataFactory()
+            ->getMetadataForClass(get_class($entity))
+            ->getOutsideClassMetadata()
+        ;
     }
 
     /**
@@ -100,5 +93,20 @@ class Processor
     public function getPropertyAccessor()
     {
         return $this->propertyAccessor;
+    }
+
+    /**
+     * Checks if a given object needs processing for a given operation
+     *
+     * @param object $object
+     * @param string $operation
+     *
+     * @return bool
+     */
+    public function needsProcessing($object, $operation)
+    {
+        return $this->getClassMetadata($object)
+            ->hasOperation($operation)
+        ;
     }
 }
