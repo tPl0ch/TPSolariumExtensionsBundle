@@ -25,5 +25,19 @@ class Id extends BaseAnnotation
      *
      * @var string
      */
-    public $name = 'id';
+    public $name;
+
+    /**
+     * @param array $options
+     */
+    public function __construct(Array $options)
+    {
+        if (isset($options['value'])) {
+            $this->name = (string) $options['value'];
+        } elseif (isset($options['name'])) {
+            $this->name = (string) $options['name'];
+        } else {
+            $this->name = 'id';
+        }
+    }
 }

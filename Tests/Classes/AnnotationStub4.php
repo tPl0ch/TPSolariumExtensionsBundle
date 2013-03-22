@@ -1,6 +1,6 @@
 <?php
 /**
- * AnnotationStub2.php
+ * AnnotationStub4.php
  *
  * This file is part of the SolariumExtensionsBundle.
  * Read the LICENSE file in the root of the project for information on copyright.
@@ -10,23 +10,29 @@
  */
 namespace TP\SolariumExtensionsBundle\Tests\Classes;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations as Solarium;
 
 /**
- * Class AnnotationStub2
+ * Class AnnotationStub4
  *
  * @package TP\SolariumExtensionsBundle\Tests\Classes
  *
  * @Solarium\Document("solarium.client.default")
  */
-class AnnotationStub2
+class AnnotationStub4
 {
     /**
      * @var int
      *
-     * @Solarium\Id("custom_id")
+     * @Solarium\Id()
      */
     public $id = 1423;
 
-    public $string2;
+    /**
+     * @var int
+     *
+     * @Solarium\Id()
+     */
+    public $duplicateId = 1423;
 }

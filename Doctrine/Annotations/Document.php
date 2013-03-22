@@ -41,10 +41,12 @@ class Document extends BaseAnnotation
     public function __construct(Array $options)
     {
         if (isset($options['value'])) {
-            $defaultOperation =  new Operation(array(
-                'value'     => Operation::OPERATION_ALL,
-                'service'   => (string) $options['value']
-            ));
+            $defaultOperation =  new Operation(
+                array(
+                    'value'     => Operation::OPERATION_ALL,
+                    'service'   => (string) $options['value']
+                )
+            );
             $this->operations[Operation::OPERATION_ALL] = $defaultOperation;
         } else {
             $this->processOperationOption($options);
@@ -111,7 +113,9 @@ class Document extends BaseAnnotation
             }
 
             if ($operation->operation === Operation::OPERATION_ALL  && count($options['operations']) > 1) {
-                throw new \LogicException("You mustn't specify other Operations when using 'Operation::OPERATION_ALL'.");
+                throw new \LogicException(
+                    "You mustn't specify other Operations when using 'Operation::OPERATION_ALL'."
+                );
             }
 
             if (array_key_exists($operation->operation, $this->operations)) {

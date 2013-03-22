@@ -112,7 +112,7 @@ class Field extends BaseAnnotation
     /**
      * @var string
      */
-    public $propertyAccess;
+    public $propertyAccess = null;
 
     /**
      * Indicates if the MappingTable should be used to generate the field name.
@@ -132,6 +132,7 @@ class Field extends BaseAnnotation
 
     /**
      * @param array $options
+     * @throws \InvalidArgumentException
      */
     public function __construct(Array $options)
     {
@@ -168,15 +169,25 @@ class Field extends BaseAnnotation
         if (isset($options['name'])) {
             $this->name = (string) $options['name'];
         }
+
+        if (isset($options['useMapping'])) {
+            $this->useMapping = (bool) $options['useMapping'];
+        }
+
+        if (isset($options['inflect'])) {
+            $this->inflect = (bool) $options['inflect'];
+        }
     }
 
     /**
      * Creates a given field name with given settings.
      *
-     * @param array  $mapping
+     * @param array $mapping
      * @param string $name
      *
      * @return string
+     *
+     * @throws \LogicException
      */
     public function getFieldName(Array $mapping, $name = null)
     {

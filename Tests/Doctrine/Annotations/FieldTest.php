@@ -73,6 +73,8 @@ class FieldTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(23.0, $this->field->boost);
         $this->assertNull($this->field->name);
         $this->assertNull($this->field->propertyAccess);
+        $this->assertTrue($this->field->inflect);
+        $this->assertTrue($this->field->useMapping);
 
         $this->field = new Field(array('type' => Field::TYPE_DATE_MULTI, 'propertyAccess' => 'test'));
 
@@ -80,6 +82,10 @@ class FieldTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('test', $this->field->propertyAccess);
         $this->assertEquals(0.0, $this->field->boost);
         $this->assertNull($this->field->name);
+
+        $this->field = new Field(array('inflect' => false, 'useMapping' => false));
+        $this->assertFalse($this->field->inflect);
+        $this->assertFalse($this->field->useMapping);
     }
 
     /**

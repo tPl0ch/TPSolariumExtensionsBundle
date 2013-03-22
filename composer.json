@@ -4,7 +4,8 @@
     "require": {
         "doctrine/annotations": "dev-master",
         "symfony/property-access": ">=2.2.0",
-        "nelmio/solarium-bundle": ">=1.1.0"
+        "nelmio/solarium-bundle": ">=1.1.0",
+        "jms/metadata": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*"
