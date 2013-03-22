@@ -26,6 +26,9 @@ use TP\SolariumExtensionsBundle\Processor\Processor;
 use Metadata\MetadataFactory;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub6;
+use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub7;
+use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub8;
 
 
 /**
@@ -55,16 +58,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
         $object = new AnnotationStub1();
 
-        $mockClientOne = $this->getMockBuilder('Solarium\Client')->getMock();
-
-        $queryOne = new Query();
-
-        $mockClientOne->expects($this->once())
-            ->method('createUpdate')
-            ->will($this->returnValue($queryOne))
-        ;
-
-        $this->processor->getServiceManager()->setClient($mockClientOne, 'solarium.client.save');
+        $queryOne = $this->addClientGetQuery('solarium.client.save');
 
         $this->processor->process($object, Operation::OPERATION_SAVE);
 
@@ -77,6 +71,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(1, $documents);
         $this->assertInstanceOf('Solarium\QueryType\Update\Query\Document\Document', $documents[0]);
+        $this->assertEquals(2.4, $documents[0]->getBoost());
 
         $this->assertEquals(1423, $documents[0]->custom_id);
         $this->assertEquals('string', $documents[0]->string_s);
@@ -99,12 +94,99 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $finalQuery = clone $queryOne;
         $finalQuery->addCommit();
 
-        $mockClientOne->expects($this->once())
+        $this->processor
+            ->getServiceManager()
+            ->getClient('solarium.client.save')
+            ->expects($this->once())
             ->method('update')
             ->with($finalQuery)
         ;
 
         $this->processor->flush();
+    }
+
+    public function testProcessingDelete()
+    {
+        $object = new AnnotationStub8();
+
+        $queryOne = $this->addClientGetQuery('solarium.client.delete');
+
+        $this->processor->process($object, Operation::OPERATION_DELETE);
+
+        $commands = $queryOne->getCommands();
+        $this->assertCount(1, $commands);
+        $this->assertInstanceOf('Solarium\QueryType\Update\Query\Command\Delete', $commands[0]);
+
+        $this->assertEquals(array(1423), $commands[0]->getIds());
+
+        $finalQuery = clone $queryOne;
+        $finalQuery->addCommit();
+
+        $this->processor
+            ->getServiceManager()
+            ->getClient('solarium.client.delete')
+            ->expects($this->once())
+            ->method('update')
+            ->with($finalQuery)
+        ;
+
+        $this->processor->flush();
+    }
+
+    public function testProcessingUpdate()
+    {
+        $object = new AnnotationStub1();
+
+        $queryOne = $this->addClientGetQuery('solarium.client.update');
+
+        $this->processor->process($object, Operation::OPERATION_UPDATE);
+
+        $commands = $queryOne->getCommands();
+
+        $this->assertTrue($commands[0]->getOption('overwrite'));
+
+        $finalQuery = clone $queryOne;
+        $finalQuery->addCommit();
+
+        $this->processor
+            ->getServiceManager()
+            ->getClient('solarium.client.update')
+            ->expects($this->once())
+            ->method('update')
+            ->with($finalQuery)
+        ;
+
+        $this->processor->flush();
+    }
+
+    public function testNoProcessingWhenNotNeeded()
+    {
+        $object = new AnnotationStub6();
+        $this->assertFalse($this->processor->process($object, Operation::OPERATION_SAVE));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Field 'collection' is declared as multi field, but property value is not traversable.
+     */
+    public function testExceptionNoTraversable()
+    {
+        $object = new AnnotationStub7();
+        $this->addClientGetQuery('solarium.client.default');
+
+        $this->processor->process($object, Operation::OPERATION_SAVE);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Property 'date' must be of type \DateTime, 'string' given.
+     */
+    public function testExceptionNoDateTime()
+    {
+        $object = new AnnotationStub7(true);
+        $this->addClientGetQuery('solarium.client.default');
+
+        $this->processor->process($object, Operation::OPERATION_SAVE);
     }
 
     public function testNeedsProcessing()
@@ -122,5 +204,21 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->processor->needsProcessing($object, Operation::OPERATION_SAVE));
         $this->assertTrue($this->processor->needsProcessing($object, Operation::OPERATION_ALL));
         $this->assertTrue($this->processor->needsProcessing($object, Operation::OPERATION_DELETE));
+    }
+
+    private function addClientGetQuery($id)
+    {
+        $mockClientOne = $this->getMockBuilder('Solarium\Client')->getMock();
+
+        $queryOne = new Query();
+
+        $mockClientOne->expects($this->once())
+            ->method('createUpdate')
+            ->will($this->returnValue($queryOne))
+        ;
+
+        $this->processor->getServiceManager()->setClient($mockClientOne, $id);
+
+        return $queryOne;
     }
 }

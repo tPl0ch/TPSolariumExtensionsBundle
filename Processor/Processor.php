@@ -97,10 +97,15 @@ class Processor
      */
     public function getClassMetadata($entity)
     {
-        return $this->getMetadataFactory()
+        $hierarchy = $this->getMetadataFactory()
             ->getMetadataForClass(get_class($entity))
-            ->getOutsideClassMetadata()
         ;
+
+        if (!$hierarchy) {
+            return null;
+        }
+
+        return $hierarchy->getOutsideClassMetadata();
     }
 
     /**
@@ -121,9 +126,11 @@ class Processor
      */
     public function needsProcessing($object, $operation)
     {
-        return $this->getClassMetadata($object)
-            ->hasOperation($operation)
-        ;
+        if (!$metadata = $this->getClassMetadata($object)) {
+            return false;
+        }
+
+        return $metadata->hasOperation($operation);
     }
 
     /**
@@ -211,7 +218,7 @@ class Processor
                     }
 
                     if ($property->type === Field::TYPE_DATE_MULTI) {
-                        $value = $this->checkDateField($value);
+                        $value = $this->checkDateField($value, $property);
                     }
 
                     $document->addField($property->fieldName, $value);
@@ -220,7 +227,7 @@ class Processor
                 $value = $property->getValue($object);
 
                 if ($property->type === Field::TYPE_DATE) {
-                    $value = $this->checkDateField($value);
+                    $value = $this->checkDateField($value, $property);
                 }
                 $document->addField($property->fieldName, $value);
             }
@@ -241,24 +248,24 @@ class Processor
         $classMetadata = $this->getClassMetadata($object);
 
         $query = $this->getServiceManager()->getUpdateQuery($classMetadata, Operation::OPERATION_DELETE);
-        $query->addDeleteById($object->getId());
-        $query->addCommit();
+        $query->addDeleteById($this->getPropertyAccessor()->getValue($object, $classMetadata->idPropertyAccess));
     }
 
     /**
      * @param $value
+     * @param $property
      *
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    private function checkDateField($value)
+    private function checkDateField($value, $property)
     {
         if (!$value instanceof \DateTime) {
             $type    = gettype($value);
             $message = "Property '%s' must be of type \\DateTime, '%s' given.";
 
-            throw new \InvalidArgumentException(sprintf($message, $type));
+            throw new \InvalidArgumentException(sprintf($message, $property->name, $type));
         }
 
         return self::makeSolrTime($value);
