@@ -11,6 +11,7 @@
 namespace TP\SolariumExtensionsBundle\Manager;
 
 use Solarium\Client;
+use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
 
 /**
  * Class SolariumServiceManager
@@ -58,4 +59,42 @@ class SolariumServiceManager
         return $this->clients[$id];
     }
 
+    /**
+     * @param ClassMetadata $classMetadata
+     * @param $operation
+     *
+     * @return null
+     */
+    public function getUpdateQuery(ClassMetadata $classMetadata, $operation)
+    {
+        if (!$classMetadata->hasOperation($operation)) {
+            return null;
+        }
+
+        $service = $classMetadata->getServiceId($operation);
+
+        if (array_key_exists($service, $this->updateStack)) {
+            return $this->updateStack[$service];
+        }
+
+        $this->updateStack[$service] = $this
+            ->getClient($service)
+            ->createUpdate()
+        ;
+
+        return $this->updateStack[$service];
+    }
+
+    /**
+     * Send all outstanding update requests to the various clients.
+     *
+     * @return void
+     */
+    public function doUpdate()
+    {
+        foreach ($this->updateStack as $service => $update) {
+            $client = $this->getClient($service);
+            $client->update($update);
+        }
+    }
 }

@@ -10,8 +10,12 @@
  */
 namespace TP\SolariumExtensionsBundle\Tests\Manager;
 
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
+use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
+
 use Solarium\Client;
+use Solarium\QueryType\Update\Query\Query;
 
 /**
  * Class SolariumServiceManagerTest
@@ -26,11 +30,17 @@ class SolariumServiceManagerTest extends \PHPUnit_Framework_TestCase
     public $manager;
 
     /**
+     * @var ClassMetadata
+     */
+    public $metadata;
+
+    /**
      * {@inheritDoc}
      */
     protected function setUp()
     {
         $this->manager = new SolariumServiceManager();
+        $this->metadata = new ClassMetadata('TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub1');
     }
 
     public function testClientSettingValid()
@@ -48,5 +58,56 @@ class SolariumServiceManagerTest extends \PHPUnit_Framework_TestCase
     public function testClientSettingInvalid()
     {
         $this->manager->getClient('INVALID');
+    }
+
+    public function testUpdateStackHandling()
+    {
+        $clientMockOne = $this->getMockBuilder('Solarium\Client')->getMock();
+        $clientMockTwo = $this->getMockBuilder('Solarium\Client')->getMock();
+
+        $this->manager->setClient($clientMockOne, 'solarium.client.save');
+        $this->manager->setClient($clientMockTwo, 'solarium.client.update');
+
+        $updateOne = new Query();
+        $updateTwo = new Query();
+
+        $clientMockOne
+            ->expects($this->once())
+            ->method('createUpdate')
+            ->will($this->returnValue($updateOne))
+        ;
+
+        $clientMockTwo
+            ->expects($this->once())
+            ->method('createUpdate')
+            ->will($this->returnValue($updateTwo))
+        ;
+
+        $clientMockOne
+            ->expects($this->once())
+            ->method('update')
+            ->with($updateOne)
+        ;
+
+        $clientMockTwo
+            ->expects($this->once())
+            ->method('update')
+            ->with($updateTwo)
+        ;
+
+        $this->metadata->operations = array(
+            Operation::OPERATION_SAVE   => 'solarium.client.save',
+            Operation::OPERATION_UPDATE => 'solarium.client.update'
+        );
+
+        $this->assertSame($updateOne, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_SAVE));
+        $this->assertSame($updateTwo, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_UPDATE));
+
+        // This is to test that the objects are now fetched from the stack without calling the mocks
+        $this->assertSame($updateOne, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_SAVE));
+        $this->assertSame($updateTwo, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_UPDATE));
+
+        // Call update handler for all open update documents
+        $this->manager->doUpdate();
     }
 }
