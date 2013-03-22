@@ -32,4 +32,12 @@ class DoctrineListener
     {
         $this->processor = $processor;
     }
+
+    /**
+     * @return \TP\SolariumExtensionsBundle\Processor\Processor
+     */
+    public function getProcessor()
+    {
+        return $this->processor;
+    }
 }

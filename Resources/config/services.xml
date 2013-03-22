@@ -11,23 +11,31 @@
         <parameter key="solarium_extensions.doctrine_listener.class">TP\SolariumExtensionsBundle\EventListener\DoctrineListener</parameter>
         <parameter key="solarium_extensions.metadata_factory.class">Metadata\MetadataFactory</parameter>
         <parameter key="solarium_extensions.metadata.annotation_driver.class">TP\SolariumExtensionsBundle\Metadata\Driver\AnnotationDriver</parameter>
+        <parameter key="solarium_extensions.metadata.cache_class">Metadata\Cache\FileCache</parameter>
     </parameters>
 
     <services>
 
-        <service id="solarium_extensions.service_manager" class="%solarium_extensions.service_manager.class%" />
+        <service id="solarium_extensions.service_manager" class="%solarium_extensions.service_manager.class%" public="false" />
 
-        <service id="solarium_extensions.annotations_reader" class="%solarium_extensions.annotations_reader.class%" />
+        <service id="solarium_extensions.annotations_reader" class="%solarium_extensions.annotations_reader.class%" public="false" />
 
         <service id="solarium_extensions.metadata.annotation_driver" class="%solarium_extensions.metadata.annotation_driver.class%" public="false">
             <argument type="service" id="solarium_extensions.annotations_reader" />
         </service>
 
-        <service id="solarium_extensions.metadata_factory" class="%solarium_extensions.metadata_factory.class%" public="false">
-            <argument type="service" id="solarium_extensions.metadata.annotation_driver" />
+        <service id="solarium_extensions.metadata.cache" class="%solarium_extensions.metadata.cache_class%" public="false">
+            <argument />
         </service>
 
-        <service id="solarium_extensions.processor" class="%solarium_extensions.processor.class%">
+        <service id="solarium_extensions.metadata_factory" class="%solarium_extensions.metadata_factory.class%" public="false">
+            <argument type="service" id="solarium_extensions.metadata.annotation_driver" />
+            <call method="setCache">
+                <argument type="service" id="solarium_extensions.metadata.cache" />
+            </call>
+        </service>
+
+        <service id="solarium_extensions.processor" class="%solarium_extensions.processor.class%" public="false">
             <argument type="service" id="solarium_extensions.metadata_factory" />
             <argument type="service" id="solarium_extensions.service_manager" />
         </service>

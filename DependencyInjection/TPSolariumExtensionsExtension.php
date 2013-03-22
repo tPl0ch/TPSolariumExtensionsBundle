@@ -10,6 +10,7 @@
  */
 namespace TP\SolariumExtensionsBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -37,5 +38,19 @@ class TPSolariumExtensionsExtension extends Extension
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
+
+        if (!is_dir($config['metadata_cache_dir'])) {
+            mkdir($config['metadata_cache_dir'], 0775, true);
+        }
+
+        if (!is_writable($config['metadata_cache_dir'])) {
+            $message = "Metadata cache directory '%s' is not writable.";
+            throw new InvalidConfigurationException(sprintf($message, $config['metadata_cache_dir']));
+        }
+
+        $container
+            ->getDefinition('solarium_extensions.metadata.cache')
+            ->replaceArgument(0, $config['metadata_cache_dir'])
+        ;
     }
 }

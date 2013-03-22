@@ -11,12 +11,16 @@
 namespace TP\SolariumExtensionsBundle\Tests;
 
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
-use TP\SolariumExtensionsBundle\DependencyInjection\Compiler\NelmioConfigSnifferPass;
-use TP\SolariumExtensionsBundle\DependencyInjection\TPSolariumExtensionsExtension;
-use Nelmio\SolariumBundle\DependencyInjection\NelmioSolariumExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+
+use TP\SolariumExtensionsBundle\DependencyInjection\Compiler\NelmioConfigSnifferPass;
+use TP\SolariumExtensionsBundle\DependencyInjection\TPSolariumExtensionsExtension;
+
+use Nelmio\SolariumBundle\DependencyInjection\NelmioSolariumExtension;
+
 use Solarium\Client;
+
 
 /**
  * Class TPSolariumExtensionsExtensionTest
@@ -25,23 +29,92 @@ use Solarium\Client;
  */
 class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
 {
-    public function testClientSniffing()
-    {
-        $config = array(
-            'default_client' => 'client1',
-            'clients' => array(
-                'client1' => array(
-                    'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientOne'
-                ),
-                'client2' => array(
-                    'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientTwo'
-                )
+    /**
+     * @var \Symfony\Component\DependencyInjection\ContainerBuilder
+     */
+    public $container;
+
+    /**
+     * @var array
+     */
+    public $configNelmio = array(
+        'default_client' => 'client1',
+        'clients' => array(
+            'client1' => array(
+                'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientOne'
             ),
+            'client2' => array(
+                'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientTwo'
+            )
+        ),
+    );
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setUp()
+    {
+        $configTp = array(
+            'metadata_cache_dir' => '%kernel.cache_dir%/metadata_test_cache'
         );
 
-        $container = $this->getTestContainer($config);
+        $this->container = $this->getTestContainer($this->configNelmio, $configTp);
+    }
 
-        $manager = $container->get('solarium_extensions.service_manager');
+    public function testCacheDirOption()
+    {
+        $this->assertFileExists(__DIR__ . '/metadata_test_cache');
+
+        $configTp = array(
+            'metadata_cache_dir' => '%kernel.cache_dir%/metadata_test_cache_two'
+        );
+
+        $this->container = $this->getTestContainer($this->configNelmio, $configTp);
+
+        $this->assertFileExists(__DIR__ . '/metadata_test_cache_two');
+        rmdir(__DIR__ . '/metadata_test_cache_two');
+    }
+
+    public function testDoctrineListenerInitialized()
+    {
+        $listener = $this->container->get('solarium_extensions.doctrine_listener');
+
+        $this->assertInstanceOf(
+            $this->container->getParameter('solarium_extensions.doctrine_listener.class'),
+            $listener
+        );
+    }
+
+    public function testProcessorCreation()
+    {
+        $processor = $this->container
+            ->get('solarium_extensions.doctrine_listener')
+            ->getProcessor()
+        ;
+
+        $this->assertInstanceOf(
+            $this->container->getParameter('solarium_extensions.processor.class'),
+            $processor
+        );
+
+        $this->assertInstanceOf(
+            $this->container->getParameter('solarium_extensions.metadata_factory.class'),
+            $processor->getMetadataFactory()
+        );
+
+        $this->assertInstanceOf(
+            $this->container->getParameter('solarium_extensions.service_manager.class'),
+            $processor->getServiceManager()
+        );
+    }
+
+    public function testClientSniffing()
+    {
+        $manager = $this->container
+            ->get('solarium_extensions.doctrine_listener')
+            ->getProcessor()
+            ->getServiceManager()
+        ;
 
         $this->assertInstanceOf(
             'TP\SolariumExtensionsBundle\Manager\SolariumServiceManager',
@@ -59,23 +132,23 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertSame(
-            $container->get('solarium.client.client1'),
+            $this->container->get('solarium.client.client1'),
             $manager->getClient('solarium.client.client1')
         );
 
         $this->assertSame(
-            $container->get('solarium.client.client2'),
+            $this->container->get('solarium.client.client2'),
             $manager->getClient('solarium.client.client2')
         );
     }
 
-    private function getTestContainer($config)
+    private function getTestContainer($configNelmio, $configTp)
     {
         $container = $this->createContainer();
         $container->registerExtension(new NelmioSolariumExtension());
-        $container->loadFromExtension('nelmio_solarium', $config);
+        $container->loadFromExtension('nelmio_solarium', $configNelmio);
         $container->registerExtension(new TPSolariumExtensionsExtension());
-        $container->loadFromExtension('tp_solarium_extensions', array());
+        $container->loadFromExtension('tp_solarium_extensions', $configTp);
 
         $container->addCompilerPass(new NelmioConfigSnifferPass());
 
@@ -93,6 +166,14 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
         )));
 
         return $container;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function tearDown()
+    {
+        rmdir(__DIR__ . '/metadata_test_cache');
     }
 }
 

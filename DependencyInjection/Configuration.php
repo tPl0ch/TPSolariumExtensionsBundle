@@ -28,8 +28,14 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('tp_solarium_extensions');
-
+        $treeBuilder
+            ->root('tp_solarium_extensions')
+            ->children()
+                ->scalarNode('metadata_cache_dir')
+                    ->defaultValue('%kernel.cache_dir%/solarium_extensions')
+                ->end()
+            ->end()
+        ;
         return $treeBuilder;
     }
 }

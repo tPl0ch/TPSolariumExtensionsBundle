@@ -40,4 +40,20 @@ class Processor
         $this->metadataFactory = $metadataFactory;
         $this->serviceManager  = $serviceManager;
     }
+
+    /**
+     * @return \Metadata\MetadataFactoryInterface
+     */
+    public function getMetadataFactory()
+    {
+        return $this->metadataFactory;
+    }
+
+    /**
+     * @return \TP\SolariumExtensionsBundle\Manager\SolariumServiceManager
+     */
+    public function getServiceManager()
+    {
+        return $this->serviceManager;
+    }
 }
