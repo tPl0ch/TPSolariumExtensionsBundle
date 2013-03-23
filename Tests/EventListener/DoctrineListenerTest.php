@@ -53,7 +53,7 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
         ;
 
         $event->expects($this->once())
-            ->method('getObject')
+            ->method('getEntity')
             ->will($this->returnValue($return))
         ;
 

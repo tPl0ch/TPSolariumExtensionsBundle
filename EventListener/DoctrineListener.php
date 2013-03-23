@@ -52,7 +52,7 @@ class DoctrineListener
      */
     public function postPersist(LifecycleEventArgs $args)
     {
-        $object = $args->getObject();
+        $object = $args->getEntity();
 
         if ($this->processor->needsProcessing($object, Operation::OPERATION_SAVE)) {
             $this->processor->process($object, Operation::OPERATION_SAVE);
@@ -64,7 +64,7 @@ class DoctrineListener
      */
     public function postUpdate(LifecycleEventArgs $args)
     {
-        $object = $args->getObject();
+        $object = $args->getEntity();
 
         if ($this->processor->needsProcessing($object, Operation::OPERATION_UPDATE)) {
             $this->processor->process($object, Operation::OPERATION_UPDATE);
@@ -76,7 +76,7 @@ class DoctrineListener
      */
     public function postDelete(LifecycleEventArgs $args)
     {
-        $object = $args->getObject();
+        $object = $args->getEntity();
 
         if ($this->processor->needsProcessing($object, Operation::OPERATION_DELETE)) {
             $this->processor->process($object, Operation::OPERATION_DELETE);
