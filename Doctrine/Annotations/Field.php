@@ -153,8 +153,6 @@ class Field extends BaseAnnotation
 
                     throw new \InvalidArgumentException(sprintf($message, $options['type']));
                 }
-
-                $this->propertyAccess = $options['propertyAccess'];
             }
         }
 
@@ -176,6 +174,10 @@ class Field extends BaseAnnotation
 
         if (isset($options['inflect'])) {
             $this->inflect = (bool) $options['inflect'];
+        }
+
+        if (isset($options['propertyAccess'])) {
+            $this->propertyAccess = (string) $options['propertyAccess'];
         }
     }
 

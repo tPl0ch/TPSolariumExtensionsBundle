@@ -224,7 +224,14 @@ class Processor
                     $document->addField($property->fieldName, $value);
                 }
             } else {
-                $value = $property->getValue($object);
+                if ($property->propertyAccess) {
+                    $value = $this->getPropertyAccessor()->getValue(
+                        $property->getValue($object),
+                        $property->propertyAccess
+                    );
+                } else{
+                    $value = $property->getValue($object);
+                }
 
                 if ($property->type === Field::TYPE_DATE) {
                     $value = $this->checkDateField($value, $property);

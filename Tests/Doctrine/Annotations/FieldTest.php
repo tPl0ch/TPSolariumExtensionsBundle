@@ -67,12 +67,12 @@ class FieldTest extends \PHPUnit_Framework_TestCase
 
     public function testField()
     {
-        $this->field = new Field(array('type' => Field::TYPE_DATE, 'boost' => '23'));
+        $this->field = new Field(array('type' => Field::TYPE_DATE, 'boost' => '23', 'propertyAccess' => 'test_access'));
 
         $this->assertEquals(Field::TYPE_DATE, $this->field->type);
         $this->assertEquals(23.0, $this->field->boost);
         $this->assertNull($this->field->name);
-        $this->assertNull($this->field->propertyAccess);
+        $this->assertEquals('test_access', $this->field->propertyAccess);
         $this->assertTrue($this->field->inflect);
         $this->assertTrue($this->field->useMapping);
 

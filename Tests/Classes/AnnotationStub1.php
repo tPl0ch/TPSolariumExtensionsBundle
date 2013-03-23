@@ -110,12 +110,21 @@ class AnnotationStub1
     public $dateCollection;
 
     /**
+     * @var \stdClass
+     *
+     * @Solarium\Field(type="string", propertyAccess="title", inflect=false, useMapping=false)
+     */
+    public $objectWithPropertyAccess;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->collection = new ArrayCollection();
         $this->dateCollection = new ArrayCollection();
+        $this->objectWithPropertyAccess = new \stdClass();
+        $this->objectWithPropertyAccess->title = 'objectWithPropertyAccess';
 
         for ($i = 0; $i < 3; $i++) {
             $object = new \stdClass();

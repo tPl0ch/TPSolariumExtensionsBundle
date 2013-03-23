@@ -81,6 +81,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('mappedNoInflection', $documents[0]->mappedNoInflection_s);
         $this->assertEquals('noMappingNoInflection', $documents[0]->noMappingNoInflection);
         $this->assertEquals('customName', $documents[0]->my_custom_name_s);
+        $this->assertEquals('objectWithPropertyAccess', $documents[0]->objectWithPropertyAccess);
         $this->assertFalse($documents[0]->bool_b);
         $this->assertEquals(array('test0', 'test1', 'test2'), $documents[0]->collection_tmulti);
         $this->assertEquals('2012-03-24T00:00:00Z', $documents[0]->date_dt);
