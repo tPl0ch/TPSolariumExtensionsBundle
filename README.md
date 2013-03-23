@@ -78,11 +78,11 @@ The test suite is also a good point to check what's possible.
  *      }
  * )
  *
- * Both these notations will listen to all 'save', 'update', and 'delete' transactions via postPersist, postUpdate
- * and postDelete. Commits will only be done onFlush.
+ * Both these notations will listen to all 'save', 'update', and 'delete' transactions via postPersist,
+ * postUpdate and postDelete. Commits will only be done onFlush.
  *
- * You can also assign different NelmioSolariumbundle clients to different operations. In the next example, only 'save'
- * and 'update' will be processed, with the coresponding Clients.
+ * You can also assign different NelmioSolariumbundle clients to different operations. In the next
+ * example, only 'save' and 'update' will be processed, with the coresponding Clients.
  *
  * @Solarium\Document(
  *      operations={
@@ -95,9 +95,10 @@ The test suite is also a good point to check what's possible.
  *
  * @Solarium\Document("solarium.client.default", boost="2.4")
  *
- * This is an example of the Mapping Annotation, which you can map field types to Solr's dynamic field suffixes.
- * The strict parameter is for strict checking of field types. If no mapping is specified, a default mapping taken from
- * the current Solr default schema.xml file.
+ * This is an example of the Mapping Annotation, which you can map field types to Solr's dynamic field
+ * suffixes.
+ * The strict parameter is for strict checking of field types. If no mapping is specified, a default
+ * mapping taken from the current Solr default schema.xml file.
  *
  * @Solarium\Mapping(
  *      mapping={"text_multi"="_tmulti"},
@@ -110,8 +111,8 @@ class Example
      * @var int
      *
      * This is the Id Annotation, which is **REQUIRED** on every document.
-     * The value "custom_id" is the ID field in solr (if you omit the value, it defaults to 'id'), and propertyAccess
-     * is the propertyPath for the new PropertyAccess component.
+     * The value "custom_id" is the ID field in solr (if you omit the value, it defaults to 'id'), and
+     * propertyAccess is the propertyPath for the new PropertyAccess component.
      *
      * @Solarium\Id("custom_id", propertyAccess="id")
      */
@@ -136,8 +137,8 @@ class Example
     /**
      * @var string
      *
-     * Use the 'useMapping' parameter to control if you want the dynamic field suffix to be automatically appended,
-     * which is the default behavior.
+     * Use the 'useMapping' parameter to control if you want the dynamic field suffix to be automatically
+     * appended, which is the default behavior.
      *
      * @Solarium\Field(useMapping=true)
      */
@@ -146,8 +147,8 @@ class Example
     /**
      * @var string
      *
-     * for BC with older Solr versions, inflecting the field names is recommended to work with older filters and
-     * components.
+     * for BC with older Solr versions, inflecting the field names is recommended to work with older
+     * filters and components.
      *
      * @Solarium\Field(inflect=true)
      */
@@ -172,9 +173,10 @@ class Example
     /**
      * @var ArrayCollection
      *
-     * The multi-valued field types need to be a Traversable, so either an array or sth that implements \Traversable.
-     * The propertyAccess parameter is **MANDATORY** for multi-valued field types, so that the PropertyAccess
-     * component can fetch the values from the collection objects.
+     * The multi-valued field types need to be a Traversable, so either an array or sth that
+     * implements \Traversable.
+     * The propertyAccess parameter is **MANDATORY** for multi-valued field types, so that the
+     * PropertyAccess component can fetch the values from the collection objects.
      *
      * @Solarium\Field(type="text_multi", propertyAccess="multiName")
      */
@@ -183,8 +185,8 @@ class Example
     /**
      * @var ArrayCollection
      *
-     * The special "__raw__" value for propertyAccess skips the value fetching and just takes the raw items from the
-     * collection, like array('value1', 'value2', 'value3').
+     * The special "__raw__" value for propertyAccess skips the value fetching and just takes the
+     * raw items from the collection, like array('value1', 'value2', 'value3').
      *
      * @Solarium\Field(type="string_multi", propertyAccess="__raw__")
      */
