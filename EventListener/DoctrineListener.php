@@ -82,9 +82,9 @@ class DoctrineListener
     }
 
     /**
-     * @param LifecycleEventArgs $args
+     * @param $args
      */
-    public function onFlush(LifecycleEventArgs $args)
+    public function onFlush($args)
     {
         $this->getProcessor()->flush();
     }
