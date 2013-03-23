@@ -4,7 +4,7 @@
     "require": {
         "doctrine/annotations": "dev-master",
         "symfony/property-access": ">=2.2.0",
-        "nelmio/solarium-bundle": "dev-master",
+        "nelmio/solarium-bundle": "2.0-dev",
         "solarium/solarium": ">=3.0.0",
         "jms/metadata": "dev-master"
     },
