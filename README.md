@@ -231,3 +231,9 @@ TODO: Make extensive documentation available.
 
 [1]: https://github.com/nelmio/NelmioSolariumBundle
 [2]: https://github.com/nelmio/NelmioSolariumBundle#basic-configuration
+
+## Run the testsuite
+
+```bash
+$ phpunit -c phpunit.xml.dist
+```
