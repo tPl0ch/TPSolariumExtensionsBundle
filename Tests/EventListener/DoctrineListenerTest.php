@@ -93,7 +93,7 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
             ->method('flush')
         ;
 
-        $this->listener->postFlush($event);
+        $this->listener->onFlush($event);
     }
 
     public function getProcessingData()
