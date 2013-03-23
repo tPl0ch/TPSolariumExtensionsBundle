@@ -7,7 +7,9 @@ Document indexing configurations with support for multi-valued fields.
 ## Requirements
 
 - Symfony >= 2.2.0 (Since the PropertyAccess Component is used)
-- NelmioSolariumBundle >= 1.1.0
+- NelmioSolariumBundle >= 2.0-dev
+- jms/metadata
+- doctrine/annotations
 
 ## Installation
 
