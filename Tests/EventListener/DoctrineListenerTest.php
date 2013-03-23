@@ -47,7 +47,7 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
      */
     public function testProcessing($method, $operation, $return, $hasOperation)
     {
-        $event = $this->getMockBuilder('Doctrine\Common\Persistence\Event\LifecycleEventArgs')
+        $event = $this->getMockBuilder('Doctrine\ORM\Event\LifecycleEventArgs')
             ->disableOriginalConstructor()
             ->getMock()
         ;

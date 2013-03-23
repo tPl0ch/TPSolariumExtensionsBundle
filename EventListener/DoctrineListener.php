@@ -10,7 +10,7 @@
  */
 namespace TP\SolariumExtensionsBundle\EventListener;
 
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
