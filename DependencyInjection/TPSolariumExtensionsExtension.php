@@ -39,18 +39,20 @@ class TPSolariumExtensionsExtension extends Extension
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
-        if (!is_dir($config['metadata_cache_dir'])) {
-            mkdir($config['metadata_cache_dir'], 0775, true);
+        $cacheDirectory = $container->getParameterBag()->resolveValue($config['metadata_cache_dir']);
+
+        if (!is_dir($cacheDirectory)) {
+            mkdir($cacheDirectory, 0775, true);
         }
 
-        if (!is_writable($config['metadata_cache_dir'])) {
+        if (!is_writable($cacheDirectory)) {
             $message = "Metadata cache directory '%s' is not writable.";
-            throw new InvalidConfigurationException(sprintf($message, $config['metadata_cache_dir']));
+            throw new InvalidConfigurationException(sprintf($message, $cacheDirectory));
         }
 
         $container
             ->getDefinition('solarium_extensions.metadata.cache')
-            ->replaceArgument(0, $config['metadata_cache_dir'])
+            ->replaceArgument(0, $cacheDirectory)
         ;
     }
 }
