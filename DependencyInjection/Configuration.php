@@ -32,7 +32,7 @@ class Configuration implements ConfigurationInterface
             ->root('tp_solarium_extensions')
             ->children()
                 ->scalarNode('metadata_cache_dir')
-                    ->defaultValue('%kernel.cache_dir%/solarium_extensions')
+                    ->defaultValue('%kernel.cache_dir%/%kernel.environment%/solarium_extensions')
                 ->end()
             ->end()
         ;
