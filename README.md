@@ -59,30 +59,59 @@ tp_solarium_extensions:
     metadata_cache_dir: %kernel.cache_dir%/solarium_extensions
 ```
 
-### Example Annotation configuration
+## Example Annotation configuration
+
+Check the comments on this class to get a fist hang of the configuration until I have written a proper documentation.
+The test suite is also a good point to check what's possible.
 
 ```php
 /**
- * Class AnnotationStub1
+ * This is the main Document Annotation. The Nelmio service id is mandatory in this case:
  *
- * @package TP\SolariumExtensionsBundle\Tests\Classes
+ * @Solarium\Document("solarium.client.default")
+ *
+ * This is the same as:
+ *
+ * @Solarium\Document(
+ *      operations={
+ *          @Solarium\Operation("all", service="solarium.client.default")
+ *      }
+ * )
+ *
+ * Both these notations will listen to all 'save', 'update', and 'delete' transactions via postPersist, postUpdate
+ * and postDelete. Commits will only be done onFlush.
+ *
+ * You can also assign different NelmioSolariumbundle clients to different operations. In the next example, only 'save'
+ * and 'update' will be processed, with the coresponding Clients.
  *
  * @Solarium\Document(
  *      operations={
  *          @Solarium\Operation("save", service="solarium.client.save"),
  *          @Solarium\Operation("update", service="solarium.client.update")
- *      },
- *      boost="2.4"
+ *      }
  * )
+ *
+ * You want to add a document boost? No problem:
+ *
+ * @Solarium\Document("solarium.client.default", boost="2.4")
+ *
+ * This is an example of the Mapping Annotation, which you can map field types to Solr's dynamic field suffixes.
+ * The strict parameter is for strict checking of field types. If no mapping is specified, a default mapping taken from
+ * the current Solr default schema.xml file.
+ *
  * @Solarium\Mapping(
  *      mapping={"text_multi"="_tmulti"},
- *      strict=true
+ *      strict=false
  * )
  */
-class AnnotationStub1
+class Example
 {
     /**
      * @var int
+     *
+     * This is the Id Annotation, which is **REQUIRED** on every document.
+     * The value "custom_id" is the ID field in solr (if you omit the value, it defaults to 'id'), and propertyAccess
+     * is the propertyPath for the new PropertyAccess component.
      *
      * @Solarium\Id("custom_id", propertyAccess="id")
      */
@@ -90,6 +119,8 @@ class AnnotationStub1
 
     /**
      * @var string
+     *
+     * Fields have as standard type Field::TYPE_STRING = 'string'
      *
      * @Solarium\Field()
      */
@@ -105,26 +136,27 @@ class AnnotationStub1
     /**
      * @var string
      *
-     * @Solarium\Field(useMapping=false)
+     * Use the 'useMapping' parameter to control if you want the dynamic field suffix to be automatically appended,
+     * which is the default behavior.
+     *
+     * @Solarium\Field(useMapping=true)
      */
     public $inflectedNoMapping = 'inflectedNoMapping';
 
     /**
      * @var string
      *
-     * @Solarium\Field(inflect=false)
+     * for BC with older Solr versions, inflecting the field names is recommended to work with older filters and
+     * components.
+     *
+     * @Solarium\Field(inflect=true)
      */
     public $mappedNoInflection = 'mappedNoInflection';
 
     /**
      * @var string
      *
-     * @Solarium\Field(inflect=false, useMapping=false)
-     */
-    public $noMappingNoInflection = 'noMappingNoInflection';
-
-    /**
-     * @var string
+     * Use the 'name' parameter to generate a custom field name instead of the property name.
      *
      * @Solarium\Field(name="myCustomName")
      */
@@ -140,45 +172,60 @@ class AnnotationStub1
     /**
      * @var ArrayCollection
      *
+     * The multi-valued field types need to be a Traversable, so either an array or sth that implements \Traversable.
+     * The propertyAccess parameter is **MANDATORY** for multi-valued field types, so that the PropertyAccess
+     * component can fetch the values from the collection objects.
+     *
      * @Solarium\Field(type="text_multi", propertyAccess="multiName")
      */
     public $collection;
 
     /**
+     * @var ArrayCollection
+     *
+     * The special "__raw__" value for propertyAccess skips the value fetching and just takes the raw items from the
+     * collection, like array('value1', 'value2', 'value3').
+     *
+     * @Solarium\Field(type="string_multi", propertyAccess="__raw__")
+     */
+    public $stringCollection;
+
+    /**
      * @var \DateTime
+     *
+     * Date fields will be automatically converted from \DateTime to UTC Solr Time strings
      *
      * @Solarium\Field(type="date")
      */
     public $date;
 
-    /**
-     * @var ArrayCollection
-     *
-     * @Solarium\Field(type="date_multi", propertyAccess="__raw__")
-     */
-    public $dateCollection;
 
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->collection = new ArrayCollection();
-        $this->dateCollection = new ArrayCollection();
-
-        for ($i = 0; $i < 3; $i++) {
-            $object = new \stdClass();
-            $object->multiName = "test$i";
-
-            $this->collection->add($object);
-
-            $this->dateCollection->add(new \DateTime("201{$i}-04-24", new \DateTimeZone('UTC')));
-        }
-
-        $this->date = new \DateTime('2012-03-24', new \DateTimeZone('UTC'));
-    }
 }
 ```
+
+## Currently implemented Field types:
+
+```php
+    const TYPE_INT           = 'integer';
+    const TYPE_INT_MULTI     = 'integer_multi';
+    const TYPE_STRING        = 'string';
+    const TYPE_STRING_MULTI  = 'string_multi';
+    const TYPE_LONG          = 'long';
+    const TYPE_LONG_MULTI    = 'long_multi';
+    const TYPE_TEXT          = 'text';
+    const TYPE_TEXT_MULTI    = 'text_multi';
+    const TYPE_BOOLEAN       = 'boolean';
+    const TYPE_BOOLEAN_MULTI = 'boolean_multi';
+    const TYPE_FLOAT         = 'float';
+    const TYPE_FLOAT_MULTI   = 'float_multi';
+    const TYPE_DOUBLE        = 'double';
+    const TYPE_DOUBLE_MULTI  = 'double_multi';
+    const TYPE_DATE          = 'date';
+    const TYPE_DATE_MULTI    = 'date_multi';
+```
+
+
+TODO: Make extensive documentation available.
 
 [1]: https://github.com/nelmio/NelmioSolariumBundle
 [2]: https://github.com/nelmio/NelmioSolariumBundle#basic-configuration
