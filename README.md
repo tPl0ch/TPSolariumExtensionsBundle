@@ -31,7 +31,7 @@ Download Bundle:
 php composer.phar update tp/solarium-extensions-bundle
 ```
 
-Add the NelmioSolariumBundle to your AppKernel.php:
+Add the TPSolariumExtensionsBundle to your AppKernel.php:
 
 ```php
 public function registerBundles()
