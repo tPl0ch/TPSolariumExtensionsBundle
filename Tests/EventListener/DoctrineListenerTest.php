@@ -83,7 +83,7 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
 
     public function testOnFlush()
     {
-        $event = $this->getMockBuilder('Doctrine\Common\Persistence\Event\LifecycleEventArgs')
+        $event = $this->getMockBuilder('Doctrine\ORM\Event\OnFlushEventArgs')
             ->disableOriginalConstructor()
             ->getMock()
         ;

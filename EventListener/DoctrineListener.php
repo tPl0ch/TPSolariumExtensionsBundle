@@ -11,6 +11,8 @@
 namespace TP\SolariumExtensionsBundle\EventListener;
 
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
+
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
 use TP\SolariumExtensionsBundle\Processor\Processor;
@@ -82,9 +84,9 @@ class DoctrineListener
     }
 
     /**
-     * @param $args
+     * @param OnFlushEventArgs $args
      */
-    public function onFlush($args)
+    public function onFlush(OnFlushEventArgs $args)
     {
         $this->getProcessor()->flush();
     }
