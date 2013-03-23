@@ -4,6 +4,8 @@ TPSolariumExtensionsBundle
 An extension for the [**NelmioSolariumBundle**][1] which provides an AnnotationDriver for
 Document indexing configurations with support for multi-valued fields.
 
+[![Build Status](https://travis-ci.org/tPl0ch/TPSolariumExtensionsBundle.png?branch=master)](https://travis-ci.org/tPl0ch/TPSolariumExtensionsBundle)
+
 ## Requirements
 
 - Symfony >= 2.2.0 (Since the PropertyAccess Component is used)
