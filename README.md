@@ -65,7 +65,7 @@ TODO: Add configuration for different Cache engines.
 
 ```yaml
 tp_solarium_extensions:
-    metadata_cache_dir: %kernel.cache_dir%/solarium_extensions
+    metadata_cache_dir: %kernel.cache_dir%/%kernel.environment%/solarium_extensions
 ```
 
 ## Example Annotation configuration
