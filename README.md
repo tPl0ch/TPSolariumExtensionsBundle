@@ -14,8 +14,9 @@ will) in the issues section. Thanks in advance for your help!**
 
 - Symfony >= 2.2.0 (Since the PropertyAccess Component is used)
 - NelmioSolariumBundle >= 2.0-dev
-- jms/metadata
-- doctrine/annotations
+- jms/metadata dev-master
+- doctrine/annotations dev-master
+- doctrine/inflector dev-master
 
 ## Installation
 
