@@ -4,6 +4,10 @@ TPSolariumExtensionsBundle
 An extension for the [**NelmioSolariumBundle**][1] which provides an AnnotationDriver for
 Document indexing configurations with support for multi-valued fields.
 
+**WARNING - This Bundle is still in heavy development and, although it is working, it is 
+far from finished. I urge you to report any bugs you might come across (and you probably
+will) in the issues section. Thanks in advance for your help!**
+
 [![Build Status](https://travis-ci.org/tPl0ch/TPSolariumExtensionsBundle.png?branch=master)](https://travis-ci.org/tPl0ch/TPSolariumExtensionsBundle)
 
 ## Requirements
