@@ -103,7 +103,8 @@ The test suite is also a good point to check what's possible.
  * )
  *
  * Both these notations will listen to all 'save', 'update', and 'delete' transactions via postPersist,
- * postUpdate and postDelete. Commits will only be done onFlush.
+ * postUpdate and postDelete. Commits will only be done when the kernel terminates, so that expensive 
+ * requests can be done when the Response is already sent to the Client.
  *
  * You can also assign different NelmioSolariumbundle clients to different operations. In the next
  * example, only 'save' and 'update' will be processed, with the coresponding Clients.
