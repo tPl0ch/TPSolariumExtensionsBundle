@@ -192,7 +192,7 @@ class Example
     public $collection;
 
     /**
-     * @var ArrayCollection
+     * @var array
      *
      * The special "__raw__" value for propertyAccess skips the value fetching and just takes the
      * raw items from the collection, like array('value1', 'value2', 'value3').
@@ -202,6 +202,23 @@ class Example
     public $stringCollection;
 
     /**
+     * @var object
+     *
+     * The propertyAccess parameter can also be used to extract a single value from a single 
+     * object. In this case imagine this object:
+     *
+     * $this->singleObject = new MySpecialObject();
+     * $this->singleObject->title = "Hello propertyAccess on single object";
+     *
+     * The resulting string in the solr data will be "Hello propertyAccess on single object"!
+     * And the PropertyAccess component is very good in guessing the access method, so you 
+     * don't have to worry if it's a getter, public var, or sth else.
+     *
+     * @Solarium\Field(type="string", propertyAccess="title")
+     */
+    public $singleObject;
+
+    /**
      * @var \DateTime
      *
      * Date fields will be automatically converted from \DateTime to UTC Solr Time strings
@@ -209,8 +226,6 @@ class Example
      * @Solarium\Field(type="date")
      */
     public $date;
-
-
 }
 ```
 
