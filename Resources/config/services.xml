@@ -41,7 +41,7 @@
             </call>
         </service>
 
-        <service id="solarium_extensions.processor" class="%solarium_extensions.processor.class%" public="false">
+        <service id="solarium_extensions.processor" class="%solarium_extensions.processor.class%">
             <argument type="service" id="solarium_extensions.metadata_factory" />
             <argument type="service" id="solarium_extensions.service_manager" />
             <argument type="service" id="solarium_extensions.property_accessor" />
@@ -52,7 +52,7 @@
             <tag name="doctrine.event_listener" event="postPersist" method="postPersist"/>
             <tag name="doctrine.event_listener" event="postRemove" method="postRemove"/>
             <tag name="doctrine.event_listener" event="postUpdate" method="postUpdate"/>
-            <tag name="doctrine.event_listener" event="onFlush" method="onFlush"/>
+            <tag name="kernel.event_listener" event="kernel.terminate" method="onKernelTerminate"/>
         </service>
 
     </services>

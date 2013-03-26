@@ -81,9 +81,9 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
         $this->listener->{$method}($event);
     }
 
-    public function testOnFlush()
+    public function testOnKernelTerminate()
     {
-        $event = $this->getMockBuilder('Doctrine\ORM\Event\OnFlushEventArgs')
+        $event = $this->getMockBuilder('Symfony\Component\HttpKernel\Event\PostResponseEvent')
             ->disableOriginalConstructor()
             ->getMock()
         ;
@@ -93,7 +93,7 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
             ->method('flush')
         ;
 
-        $this->listener->onFlush($event);
+        $this->listener->onKernelTerminate($event);
     }
 
     public function getProcessingData()

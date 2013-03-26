@@ -11,13 +11,11 @@
 namespace TP\SolariumExtensionsBundle\EventListener;
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
+
+use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
-use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
 use TP\SolariumExtensionsBundle\Processor\Processor;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use TP\SolariumExtensionsBundle\Tests\Metadata\PropertyMetadataTest;
 
 /**
  * Class DoctrineListener
@@ -84,9 +82,9 @@ class DoctrineListener
     }
 
     /**
-     * @param OnFlushEventArgs $args
+     * @param PostResponseEvent $event
      */
-    public function onFlush(OnFlushEventArgs $args)
+    public function onKernelTerminate(PostResponseEvent $event)
     {
         $this->getProcessor()->flush();
     }

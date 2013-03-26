@@ -4,7 +4,7 @@ TPSolariumExtensionsBundle
 An extension for the [**NelmioSolariumBundle**][1] which provides an AnnotationDriver for
 Document indexing configurations with support for multi-valued fields.
 
-**WARNING - This Bundle is still in heavy development and, although it is working, it is 
+**WARNING - This Bundle is still in heavy development and, although it is working, it is
 far from finished. I urge you to report any bugs you might come across (and you probably
 will) in the issues section. Thanks in advance for your help!**
 
@@ -50,6 +50,21 @@ public function registerBundles()
 }
 ```
 
+**This is important to make this Bundle work correctly**
+
+Make your ```AppKernel``` class implement ```Symfony\Component\HttpKernel\TerminableInterface```:
+
+```php
+
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\HttpKernel\TerminableInterface;
+
+class AppKernel extends Kernel implements TerminableInterface
+{
+    ...
+}
+```
 
 ## Configuration
 
@@ -204,14 +219,14 @@ class Example
     /**
      * @var object
      *
-     * The propertyAccess parameter can also be used to extract a single value from a single 
+     * The propertyAccess parameter can also be used to extract a single value from a single
      * object. In this case imagine this object:
      *
      * $this->singleObject = new MySpecialObject();
      * $this->singleObject->title = "Hello propertyAccess on single object";
      *
      * The resulting string in the solr data will be "Hello propertyAccess on single object"!
-     * And the PropertyAccess component is very good in guessing the access method, so you 
+     * And the PropertyAccess component is very good in guessing the access method, so you
      * don't have to worry if it's a getter, public var, or sth else.
      *
      * @Solarium\Field(type="string", propertyAccess="title")
