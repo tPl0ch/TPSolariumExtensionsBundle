@@ -106,6 +106,33 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->metadata->hasOperation(Operation::OPERATION_UPDATE));
     }
 
+    public function testHasEndpoint()
+    {
+        $this->metadata->operations = array(
+            Operation::OPERATION_ALL => 'test.all'
+        );
+        $this->metadata->endpoints = array(
+            Operation::OPERATION_ALL => 'endpoint.all'
+        );
+        $this->assertTrue($this->metadata->hasEndpoint(Operation::OPERATION_ALL));
+        $this->assertTrue($this->metadata->hasEndpoint(Operation::OPERATION_DELETE));
+        $this->assertTrue($this->metadata->hasEndpoint(Operation::OPERATION_SAVE));
+        $this->assertTrue($this->metadata->hasEndpoint(Operation::OPERATION_UPDATE));
+
+        $this->metadata->operations = array(
+            Operation::OPERATION_SAVE   => 'test.save',
+            Operation::OPERATION_UPDATE => 'test.update'
+        );
+        $this->metadata->endpoints = array(
+            Operation::OPERATION_SAVE   => 'endpoint.save',
+            Operation::OPERATION_UPDATE => 'endpoint.update'
+        );
+        $this->assertFalse($this->metadata->hasEndpoint(Operation::OPERATION_ALL));
+        $this->assertFalse($this->metadata->hasEndpoint(Operation::OPERATION_DELETE));
+        $this->assertTrue($this->metadata->hasEndpoint(Operation::OPERATION_SAVE));
+        $this->assertTrue($this->metadata->hasEndpoint(Operation::OPERATION_UPDATE));
+    }
+
     public function testGetServiceId()
     {
         $this->metadata->operations = array(
