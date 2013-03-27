@@ -6,7 +6,7 @@
         "doctrine/inflector": "dev-master",
         "doctrine/orm": ">=2.2.0",
         "symfony/property-access": ">=2.2.0",
-        "nelmio/solarium-bundle": ">=2.0-dev",
+        "nelmio/solarium-bundle": ">=1.1.0",
         "solarium/solarium": ">=3.0.0",
         "jms/metadata": "dev-master"
     },
