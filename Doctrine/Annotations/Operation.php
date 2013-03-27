@@ -53,6 +53,11 @@ class Operation extends BaseAnnotation
     public $operation;
 
     /**
+     * @var string
+     */
+    public $endpoint;
+
+    /**
      * @param array $options
      *
      * @throws \InvalidArgumentException
@@ -77,6 +82,10 @@ class Operation extends BaseAnnotation
             $message = "Required 'service' parameter for operation '%s' is missing.";
 
             throw new \InvalidArgumentException(sprintf($message, $this->operation));
+        }
+
+        if (isset($options['endpoint'])) {
+            $this->endpoint = (string) $options['endpoint'];
         }
 
         $this->service = (string) $options['service'];

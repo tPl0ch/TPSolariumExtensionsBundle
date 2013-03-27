@@ -27,7 +27,9 @@
     "target-dir": "TP/SolariumExtensionsBundle",
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0.x-dev"
+            "dev-master": "2.1.x-dev",
+            "dev-2.0": "2.1.0-dev",
+            "dev-1.0": "1.0.x-dev"
         }
     }
 }

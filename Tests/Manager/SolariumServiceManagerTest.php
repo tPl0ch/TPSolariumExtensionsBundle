@@ -86,18 +86,22 @@ class SolariumServiceManagerTest extends \PHPUnit_Framework_TestCase
         $clientMockOne
             ->expects($this->once())
             ->method('update')
-            ->with($updateOne)
+            ->with($updateOne, 'endpoint.client.save')
         ;
 
         $clientMockTwo
             ->expects($this->once())
             ->method('update')
-            ->with($updateTwo)
+            ->with($updateTwo, null)
         ;
 
         $this->metadata->operations = array(
             Operation::OPERATION_SAVE   => 'solarium.client.save',
             Operation::OPERATION_UPDATE => 'solarium.client.update'
+        );
+
+        $this->metadata->endpoints = array(
+            Operation::OPERATION_SAVE   => 'endpoint.client.save'
         );
 
         $this->assertSame($updateOne, $this->manager->getUpdateQuery($this->metadata, Operation::OPERATION_SAVE));

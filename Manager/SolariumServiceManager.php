@@ -20,6 +20,8 @@ use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
  */
 class SolariumServiceManager
 {
+    const DEFAULT_ENDPOINT_KEY = '__default__';
+
     /**
      * @var array
      */
@@ -71,18 +73,24 @@ class SolariumServiceManager
             return null;
         }
 
-        $service = $classMetadata->getServiceId($operation);
+        $service  = $classMetadata->getServiceId($operation);
+        $endpoint = $classMetadata->getEndpoint($operation);
 
-        if (array_key_exists($service, $this->updateStack)) {
-            return $this->updateStack[$service];
+        if (null === $endpoint) {
+            $endpoint = self::DEFAULT_ENDPOINT_KEY;
         }
 
-        $this->updateStack[$service] = $this
+        if (array_key_exists($service, $this->updateStack)) {
+            return $this->updateStack[$service][$endpoint];
+        }
+
+        $this->updateStack[$service] = array();
+        $this->updateStack[$service][$endpoint] = $this
             ->getClient($service)
             ->createUpdate()
         ;
 
-        return $this->updateStack[$service];
+        return $this->updateStack[$service][$endpoint];
     }
 
     /**
@@ -92,11 +100,18 @@ class SolariumServiceManager
      */
     public function doUpdate()
     {
-        foreach ($this->updateStack as $service => $update) {
-            $update->addCommit();
-
+        foreach ($this->updateStack as $service => $config) {
             $client = $this->getClient($service);
-            $client->update($update);
+
+            foreach ($config as $endpoint => $update) {
+                $update->addCommit();
+
+                if ($endpoint === self::DEFAULT_ENDPOINT_KEY) {
+                    $endpoint = null;
+                }
+
+                $client->update($update, $endpoint);
+            }
         }
 
         $this->updateStack = array();

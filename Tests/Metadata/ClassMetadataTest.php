@@ -38,6 +38,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     public function testDefaultAttributes()
     {
         $this->assertClassHasAttribute('operations', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
+        $this->assertClassHasAttribute('endpoints', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
         $this->assertClassHasAttribute('boost', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
         $this->assertClassHasAttribute('id', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
         $this->assertClassHasAttribute('mappingTable', 'TP\SolariumExtensionsBundle\Metadata\ClassMetadata');
@@ -53,6 +54,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(0.0, $this->metadata->boost);
         $this->assertEquals(array(), $this->metadata->operations);
+        $this->assertEquals(array(), $this->metadata->endpoints);
         $this->assertEquals(array(), $this->metadata->mappingTable);
         $this->assertNull($this->metadata->id);
         $this->assertNull($this->metadata->idPropertyAccess);
@@ -63,6 +65,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->metadata->createdAt = new \DateTime('2012-03-24');
         $this->metadata->boost = 2.4;
         $this->metadata->mappingTable = array('test' => 'test');
+        $this->metadata->operations = array('operation' => 'test.operation');
+        $this->metadata->endpoints = array('endpoint' => 'test.endpoint');
         $this->metadata->id = 'test_id';
         $this->metadata->idPropertyAccess = 'test_access';
 
@@ -74,6 +78,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new \DateTime('2012-03-24'), $this->metadata->createdAt);
         $this->assertEquals(2.4, $this->metadata->boost);
         $this->assertEquals(array('test' => 'test'), $this->metadata->mappingTable);
+        $this->assertEquals(array('operation' => 'test.operation'), $this->metadata->operations);
+        $this->assertEquals(array('endpoint' => 'test.endpoint'), $this->metadata->endpoints);
         $this->assertEquals('test_id', $this->metadata->id);
         $this->assertEquals('test_access', $this->metadata->idPropertyAccess);
     }
@@ -120,5 +126,34 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->metadata->getServiceId(Operation::OPERATION_DELETE));
         $this->assertEquals('test.save', $this->metadata->getServiceId(Operation::OPERATION_SAVE));
         $this->assertEquals('test.update', $this->metadata->getServiceId(Operation::OPERATION_UPDATE));
+    }
+
+    public function testGetEndpoint()
+    {
+        $this->metadata->operations = array(
+            Operation::OPERATION_ALL => 'test.all'
+        );
+        $this->metadata->endpoints = array(
+            Operation::OPERATION_ALL => 'endpoint.all'
+        );
+
+        $this->assertEquals('endpoint.all', $this->metadata->getEndpoint(Operation::OPERATION_ALL));
+        $this->assertEquals('endpoint.all', $this->metadata->getEndpoint(Operation::OPERATION_DELETE));
+        $this->assertEquals('endpoint.all', $this->metadata->getEndpoint(Operation::OPERATION_SAVE));
+        $this->assertEquals('endpoint.all', $this->metadata->getEndpoint(Operation::OPERATION_UPDATE));
+
+        $this->metadata->operations = array(
+            Operation::OPERATION_SAVE   => 'test.save',
+            Operation::OPERATION_UPDATE => 'test.update'
+        );
+        $this->metadata->endpoints = array(
+            Operation::OPERATION_SAVE   => 'endpoint.save',
+            Operation::OPERATION_UPDATE => 'endpoint.update'
+        );
+
+        $this->assertNull($this->metadata->getEndpoint(Operation::OPERATION_ALL));
+        $this->assertNull($this->metadata->getEndpoint(Operation::OPERATION_DELETE));
+        $this->assertEquals('endpoint.save', $this->metadata->getEndpoint(Operation::OPERATION_SAVE));
+        $this->assertEquals('endpoint.update', $this->metadata->getEndpoint(Operation::OPERATION_UPDATE));
     }
 }

@@ -100,7 +100,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->getClient('solarium.client.save')
             ->expects($this->once())
             ->method('update')
-            ->with($finalQuery)
+            ->with($finalQuery, 'test.endpoint')
         ;
 
         $this->processor->flush();
@@ -154,7 +154,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->getClient('solarium.client.update')
             ->expects($this->once())
             ->method('update')
-            ->with($finalQuery)
+            ->with($finalQuery, null)
         ;
 
         $this->processor->flush();

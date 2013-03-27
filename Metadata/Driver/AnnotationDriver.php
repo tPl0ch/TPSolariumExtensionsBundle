@@ -170,6 +170,7 @@ class AnnotationDriver implements DriverInterface
         /** @var Operation $operation */
         foreach ($documentAnnotation->operations as $type => $operation) {
             $classMetadata->operations[$type] = $operation->service;
+            $classMetadata->endpoints[$type] = $operation->endpoint;
         }
 
         $classMetadata->boost = $documentAnnotation->boost;

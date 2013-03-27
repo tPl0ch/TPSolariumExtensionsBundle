@@ -20,7 +20,7 @@ use TP\SolariumExtensionsBundle\Doctrine\Annotations as Solarium;
  *
  * @Solarium\Document(
  *      operations={
- *          @Solarium\Operation("save", service="solarium.client.save"),
+ *          @Solarium\Operation("save", service="solarium.client.save", endpoint="test.endpoint"),
  *          @Solarium\Operation("update", service="solarium.client.update")
  *      },
  *      boost="2.4"

@@ -28,6 +28,11 @@ class ClassMetadata extends BaseClassMetadata
     /**
      * @var array
      */
+    public $endpoints = array();
+
+    /**
+     * @var array
+     */
     public $mappingTable = array();
 
     /**
@@ -58,6 +63,7 @@ class ClassMetadata extends BaseClassMetadata
                 $this->fileResources,
                 $this->createdAt,
                 $this->operations,
+                $this->endpoints,
                 $this->mappingTable,
                 $this->boost,
                 $this->id,
@@ -78,6 +84,7 @@ class ClassMetadata extends BaseClassMetadata
             $this->fileResources,
             $this->createdAt,
             $this->operations,
+            $this->endpoints,
             $this->mappingTable,
             $this->boost,
             $this->id,
@@ -94,11 +101,17 @@ class ClassMetadata extends BaseClassMetadata
      */
     public function hasOperation($operation)
     {
-        if (array_key_exists(Operation::OPERATION_ALL, $this->operations)) {
-            return true;
-        }
+        return $this->operationExistsForKey($operation, 'operations');
+    }
 
-        return array_key_exists($operation, $this->operations);
+    /**
+     * @param string $operation
+     *
+     * @return bool
+     */
+    public function hasEndpoint($operation)
+    {
+        return $this->operationExistsForKey($operation, 'endpoints');
     }
 
     /**
@@ -108,14 +121,50 @@ class ClassMetadata extends BaseClassMetadata
      */
     public function getServiceId($operation)
     {
-        if (!$this->hasOperation($operation)) {
+        return $this->getOperationValueForKey($operation, 'operations');
+    }
+
+    /**
+     * @param string $operation
+     *
+     * @return null|string
+     */
+    public function getEndpoint($operation)
+    {
+        return $this->getOperationValueForKey($operation, 'endpoints');
+    }
+
+    /**
+     * @param string $operation
+     * @param string $key
+     *
+     * @return null|string
+     */
+    private function getOperationValueForKey($operation, $key)
+    {
+        if (!$this->operationExistsForKey($operation, $key)) {
             return null;
         }
 
-        if ($this->hasOperation(Operation::OPERATION_ALL)) {
-            return $this->operations[Operation::OPERATION_ALL];
+        if ($this->operationExistsForKey(Operation::OPERATION_ALL, $key)) {
+            return $this->{$key}[Operation::OPERATION_ALL];
         }
 
-        return $this->operations[$operation];
+        return $this->{$key}[$operation];
+    }
+
+    /**
+     * @param string $operation
+     * @param string $key
+     *
+     * @return bool
+     */
+    private function operationExistsForKey($operation, $key)
+    {
+        if (array_key_exists(Operation::OPERATION_ALL, $this->{$key})) {
+            return true;
+        }
+
+        return array_key_exists($operation, $this->{$key});
     }
 }

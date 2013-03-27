@@ -13,7 +13,8 @@ will) in the issues section. Thanks in advance for your help!**
 ## Requirements
 
 - Symfony >= 2.2.0 (Since the PropertyAccess Component is used)
-- NelmioSolariumBundle >= 2.0-dev
+- NelmioSolariumBundle >= 2.0.0
+- solarium/solarium >= 3.0.0
 - jms/metadata dev-master
 - doctrine/annotations dev-master
 - doctrine/inflector dev-master
@@ -103,7 +104,7 @@ The test suite is also a good point to check what's possible.
  * )
  *
  * Both these notations will listen to all 'save', 'update', and 'delete' transactions via postPersist,
- * postUpdate and postDelete. Commits will only be done when the kernel terminates, so that expensive 
+ * postUpdate and postDelete. Commits will only be done when the kernel terminates, so that expensive
  * requests can be done when the Response is already sent to the Client.
  *
  * You can also assign different NelmioSolariumbundle clients to different operations. In the next
@@ -116,6 +117,17 @@ The test suite is also a good point to check what's possible.
  *      }
  * )
  *
+ * But that's not all, you can even specify different endpoints for the same client!
+ * In the following example, the "save" opration will use the "anotherOne" endpoint, while the
+ * "update" operation uses the default endpoint for the given client service.
+ *
+ * @Solarium\Document(
+ *      operations={
+ *          @Solarium\Operation("save", service="solarium.client.save", endpoint="anotherOne"),
+ *          @Solarium\Operation("update", service="solarium.client.update")
+ *      }
+ * )
+
  * You want to add a document boost? No problem:
  *
  * @Solarium\Document("solarium.client.default", boost="2.4")
