@@ -16,6 +16,7 @@ use Metadata\MetadataFactoryInterface;
 
 use Solarium\QueryType\Update\Query\Query;
 
+use TP\SolariumExtensionsBundle\Converter\ConverterCollection;
 use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
@@ -47,31 +48,27 @@ class Processor
     private $propertyAccessor;
 
     /**
+     * @var ConverterCollection
+     */
+    private $converterCollection;
+
+    /**
      * @param MetadataFactoryInterface $metadataFactory
      * @param SolariumServiceManager $serviceManager
      * @param PropertyAccessor $propertyAccessor
+     * @param ConverterCollection $converterCollection
      */
     public function __construct(
         MetadataFactoryInterface $metadataFactory,
         SolariumServiceManager $serviceManager,
-        PropertyAccessor $propertyAccessor
+        PropertyAccessor $propertyAccessor,
+        ConverterCollection $converterCollection
     )
     {
         $this->metadataFactory  = $metadataFactory;
         $this->serviceManager   = $serviceManager;
         $this->propertyAccessor = $propertyAccessor;
-    }
-
-    /**
-     * @param \DateTime $date
-     *
-     * @return string
-     */
-    public static function makeSolrTime(\DateTime $date)
-    {
-        $date->setTimezone(new \DateTimeZone('UTC'));
-
-        return $date->format('Y-m-d\TH:i:s\Z');
+        $this->converterCollection = $converterCollection;
     }
 
     /**
@@ -201,44 +198,15 @@ class Processor
 
         /** @var \TP\SolariumExtensionsBundle\Metadata\PropertyMetadata $property */
         foreach ($classMetadata->propertyMetadata as $property) {
-            if (true === $property->multi) {
-                $traversable = $property->getValue($object);
+            $converter = $this->converterCollection->getConverter($property->type);
 
-                if (!is_array($traversable) && !$traversable instanceof \Traversable && !$traversable instanceof \stdClass) {
-                    $message = "Field '%s' is declared as multi field, but property value is not traversable.";
-
-                    throw new \InvalidArgumentException(sprintf($message, $property->name));
-                }
-
-                foreach ($property->getValue($object) as $item) {
-                    if ($property->propertyAccess === PropertyMetadata::TYPE_RAW) {
-                        $value = $item;
-                    } else {
-                        $value = $this->getPropertyAccessor()->getValue($item, $property->propertyAccess);
-                    }
-
-                    if ($property->type === Field::TYPE_DATE_MULTI) {
-                        $value = $this->checkDateField($value, $property);
-                    }
-
-                    $document->addField($property->fieldName, $value);
-                }
+            if ($property->multi) {
+                $value = $converter->convertMulti($object, $property, $this->getPropertyAccessor());
             } else {
-                if ($property->propertyAccess) {
-                    $value = $this->getPropertyAccessor()->getValue(
-                        $property->getValue($object),
-                        $property->propertyAccess
-                    );
-                } else{
-                    $value = $property->getValue($object);
-                }
-
-                if ($property->type === Field::TYPE_DATE) {
-                    $value = $this->checkDateField($value, $property);
-                }
-                $document->addField($property->fieldName, $value);
+                $value = $converter->convert($object, $property, $this->getPropertyAccessor());
             }
 
+            $document->{$property->fieldName} = $value;
             $document->setFieldBoost($property->fieldName, $property->boost);
         }
 
@@ -259,22 +227,10 @@ class Processor
     }
 
     /**
-     * @param $value
-     * @param $property
-     *
-     * @return string
-     *
-     * @throws \InvalidArgumentException
+     * @return \TP\SolariumExtensionsBundle\Converter\ConverterCollection
      */
-    private function checkDateField($value, $property)
+    public function getConverterCollection()
     {
-        if (!$value instanceof \DateTime) {
-            $type    = gettype($value);
-            $message = "Property '%s' must be of type \\DateTime, '%s' given.";
-
-            throw new \InvalidArgumentException(sprintf($message, $property->name, $type));
-        }
-
-        return self::makeSolrTime($value);
+        return $this->converterCollection;
     }
 }

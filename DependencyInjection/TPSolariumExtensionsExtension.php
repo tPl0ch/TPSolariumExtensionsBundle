@@ -37,6 +37,7 @@ class TPSolariumExtensionsExtension extends Extension
         $config        = $processor->processConfiguration($configuration, $configs);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('converters.xml');
         $loader->load('services.xml');
 
         $cacheDirectory = $container->getParameterBag()->resolveValue($config['metadata_cache_dir']);

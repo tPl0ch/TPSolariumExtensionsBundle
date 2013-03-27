@@ -89,6 +89,34 @@ class AnnotationStub1
     public $bool = false;
 
     /**
+     * @var bool
+     *
+     * @Solarium\Field(type="float")
+     */
+    public $floatString = "24.35";
+
+    /**
+     * @var bool
+     *
+     * @Solarium\Field(type="float")
+     */
+    public $floatValue = 22.55;
+
+    /**
+     * @var bool
+     *
+     * @Solarium\Field(type="integer")
+     */
+    public $intString = "25";
+
+    /**
+     * @var bool
+     *
+     * @Solarium\Field(type="integer")
+     */
+    public $intValue = 26;
+
+    /**
      * @var ArrayCollection
      *
      * @Solarium\Field(type="text_multi", propertyAccess="multiName")

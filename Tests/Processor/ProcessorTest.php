@@ -13,8 +13,10 @@ namespace TP\SolariumExtensionsBundle\Tests\Metadata;
 use Doctrine\Common\Annotations\AnnotationReader;
 
 use Solarium\Client;
-
 use Solarium\QueryType\Update\Query\Query;
+
+use TP\SolariumExtensionsBundle\Converter\ConverterCollection;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Field;
 use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
 use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
 use TP\SolariumExtensionsBundle\Metadata\Driver\AnnotationDriver;
@@ -22,6 +24,7 @@ use TP\SolariumExtensionsBundle\Manager\SolariumServiceManager;
 use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub1;
 use TP\SolariumExtensionsBundle\Tests\Classes\AnnotationStub2;
 use TP\SolariumExtensionsBundle\Processor\Processor;
+use TP\SolariumExtensionsBundle\Converter\ValueConverter;
 
 use Metadata\MetadataFactory;
 
@@ -48,10 +51,12 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $factory = new MetadataFactory(new AnnotationDriver(new AnnotationReader()));
-        $manager = new SolariumServiceManager();
-
-        $this->processor = new Processor($factory, $manager, PropertyAccess::getPropertyAccessor());
+        $this->processor = new Processor(
+            new MetadataFactory(new AnnotationDriver(new AnnotationReader())),
+            new SolariumServiceManager(),
+            PropertyAccess::getPropertyAccessor(),
+            $this->setUpConverter()
+        );
     }
 
     public function testProcessingSave()
@@ -82,6 +87,10 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('noMappingNoInflection', $documents[0]->noMappingNoInflection);
         $this->assertEquals('customName', $documents[0]->my_custom_name_s);
         $this->assertEquals('objectWithPropertyAccess', $documents[0]->objectWithPropertyAccess);
+        $this->assertEquals(24.35, $documents[0]->float_string_f);
+        $this->assertEquals(22.55, $documents[0]->float_value_f);
+        $this->assertEquals(25, $documents[0]->int_string_i);
+        $this->assertEquals(26, $documents[0]->int_value_i);
         $this->assertFalse($documents[0]->bool_b);
         $this->assertEquals(array('test0', 'test1', 'test2'), $documents[0]->collection_tmulti);
         $this->assertEquals('2012-03-24T00:00:00Z', $documents[0]->date_dt);
@@ -221,5 +230,36 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->processor->getServiceManager()->setClient($mockClientOne, $id);
 
         return $queryOne;
+    }
+
+    private function setUpConverter()
+    {
+        $converter = new ConverterCollection();
+
+        $classMap = array(
+            Field::TYPE_DATE => 'TP\SolariumExtensionsBundle\Converter\Type\DateConverter',
+            Field::TYPE_DATE_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\DateConverter',
+            Field::TYPE_STRING => 'TP\SolariumExtensionsBundle\Converter\Type\StringConverter',
+            Field::TYPE_STRING_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\StringConverter',
+            Field::TYPE_TEXT => 'TP\SolariumExtensionsBundle\Converter\Type\StringConverter',
+            Field::TYPE_TEXT_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\StringConverter',
+            Field::TYPE_BOOLEAN => 'TP\SolariumExtensionsBundle\Converter\Type\BooleanConverter',
+            Field::TYPE_BOOLEAN_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\BooleanConverter',
+            Field::TYPE_FLOAT => 'TP\SolariumExtensionsBundle\Converter\Type\FloatConverter',
+            Field::TYPE_FLOAT_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\FloatConverter',
+            Field::TYPE_LONG => 'TP\SolariumExtensionsBundle\Converter\Type\FloatConverter',
+            Field::TYPE_LONG_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\FloatConverter',
+            Field::TYPE_DOUBLE => 'TP\SolariumExtensionsBundle\Converter\Type\FloatConverter',
+            Field::TYPE_DOUBLE_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\FloatConverter',
+            Field::TYPE_INT => 'TP\SolariumExtensionsBundle\Converter\Type\IntegerConverter',
+            Field::TYPE_INT_MULTI => 'TP\SolariumExtensionsBundle\Converter\Type\IntegerConverter',
+            Field::TYPE_LOCATION => 'TP\SolariumExtensionsBundle\Converter\ValueConverter',
+        );
+
+        foreach (Field::getFieldTypes() as $field) {
+            $converter->registerConverter($field, $classMap[$field]);
+        }
+
+        return $converter;
     }
 }
