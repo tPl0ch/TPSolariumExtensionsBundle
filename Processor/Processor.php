@@ -213,7 +213,6 @@ class Processor
         }
 
         $query->addDocument($document, $update);
-        $query->addCommit();
     }
 
     /**
@@ -227,7 +226,6 @@ class Processor
 
         $query = $this->getServiceManager()->getUpdateQuery($classMetadata, Operation::OPERATION_DELETE);
         $query->addDeleteById($this->getPropertyAccessor()->getValue($object, $classMetadata->idPropertyAccess));
-        $query->addCommit();
     }
 
     /**

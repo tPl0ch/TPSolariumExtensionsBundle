@@ -114,6 +114,7 @@ class SolariumServiceManager
                     continue;
                 }
 
+                $update->addCommit();
                 $client->update($update, $endpoint);
             }
         }
