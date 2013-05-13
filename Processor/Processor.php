@@ -176,7 +176,7 @@ class Processor
      * @throws \InvalidArgumentException
      * @return void
      */
-    protected function processSave($object, $update = false, $commitWithin = false)
+    protected function processSave($object, $update = null, $commitWithin = null)
     {
         $operation = Operation::OPERATION_SAVE;
 
@@ -206,11 +206,14 @@ class Processor
                 $value = $converter->convert($object, $property, $this->getPropertyAccessor());
             }
 
-            $document->{$property->fieldName} = $value;
-            $document->setFieldBoost($property->fieldName, $property->boost);
+            if (0.0 === $property->boost) {
+                $property->boost = null;
+            }
+            $document->addField($property->fieldName, $value, $property->boost);
         }
 
-        $query->addDocument($document, $update, $commitWithin);
+        $query->addDocument($document, $update);
+        $query->addCommit();
     }
 
     /**
@@ -224,6 +227,7 @@ class Processor
 
         $query = $this->getServiceManager()->getUpdateQuery($classMetadata, Operation::OPERATION_DELETE);
         $query->addDeleteById($this->getPropertyAccessor()->getValue($object, $classMetadata->idPropertyAccess));
+        $query->addCommit();
     }
 
     /**

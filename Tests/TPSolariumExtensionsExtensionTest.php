@@ -11,6 +11,8 @@
 namespace TP\SolariumExtensionsBundle\Tests;
 
 use Solarium\Core\Client\Endpoint;
+use Solarium\Core\Client\Request;
+use Solarium\QueryType\Update\RequestBuilder;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
@@ -21,6 +23,8 @@ use TP\SolariumExtensionsBundle\DependencyInjection\TPSolariumExtensionsExtensio
 use Nelmio\SolariumBundle\DependencyInjection\NelmioSolariumExtension;
 
 use Solarium\Client;
+use TP\SolariumExtensionsBundle\Doctrine\Annotations\Operation;
+use TP\SolariumExtensionsBundle\Tests\Classes\IntegrationStub1;
 
 
 /**
@@ -43,9 +47,9 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
             'default' => array(
                 'host' => 'localhost',
                 'port' => '8080',
-                'path' => 'solr-jobzauberer',
+                'path' => '/solr-jobzauberer',
                 'core' => 'jobzauberer_test',
-                'timeout' => 5
+                'timeout' => 500
             ),
             'test' => array(
                 'host' => 'localhost',
@@ -59,7 +63,7 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
         'clients' => array(
             'client1' => array(
                 'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientOne',
-                'endpoints' => array('default')
+                'endpoints' => array('default'),
             ),
             'client2' => array(
                 'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientTwo',
@@ -148,9 +152,9 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
         $endpointDefault = new Endpoint(array(
             'host' => 'localhost',
             'port' => '8080',
-            'path' => 'solr-jobzauberer',
+            'path' => '/solr-jobzauberer',
             'core' => 'jobzauberer_test',
-            'timeout' => 5,
+            'timeout' => 500,
             'key' => 'default'
         ));
 
@@ -198,6 +202,48 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testIndexing()
+    {
+        $manager = $this->container
+            ->get('solarium_extensions.doctrine_listener')
+            ->getProcessor()
+            ->getServiceManager()
+        ;
+
+        $client = $manager->getClient('solarium.client.client1');
+
+        if (!$this->isConnectableClient($client)) {
+            $this->markTestSkipped("Couldn't connect to configured endpoint");
+        }
+
+        $doc = new IntegrationStub1();
+        $doc->id = "1423";
+
+        $processor = $this->container
+            ->get('solarium_extensions.doctrine_listener')
+            ->getProcessor()
+        ;
+
+        $this->assertTrue($processor->process($doc, Operation::OPERATION_SAVE));
+
+        $query = $processor
+            ->getServiceManager()
+            ->getUpdateQuery($processor->getClassMetadata($doc), Operation::OPERATION_SAVE)
+        ;
+
+        $result = $client->update($query);
+        $response = $result->getResponse();
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $update = $client->createUpdate();
+
+        $update->addDeleteById($doc->id);
+        $update->addCommit();
+
+        $client->update($update);
+    }
+
     private function getTestContainer($configNelmio, $configTp)
     {
         $container = $this->createContainer();
@@ -229,7 +275,50 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        rmdir(__DIR__ . '/metadata_test_cache');
+        $directory = __DIR__ . '/metadata_test_cache';
+
+        $this->recursiveDelete($directory);
+    }
+
+    private function recursiveDelete($dir)
+    {
+        if (!file_exists($dir)) {
+            return true;
+        }
+
+        if (!is_dir($dir)) {
+            return unlink($dir);
+        }
+
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+
+            if (!$this->recursiveDelete($dir.DIRECTORY_SEPARATOR.$item)) {
+                return false;
+            }
+        }
+
+        return rmdir($dir);
+    }
+
+    /**
+     * @param Client $client
+     *
+     * @return bool
+     */
+    private function isConnectableClient(Client $client)
+    {
+        $ping = $client->createPing();
+
+        try {
+            $result = $client->ping($ping);
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 }
 

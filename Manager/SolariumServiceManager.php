@@ -11,6 +11,8 @@
 namespace TP\SolariumExtensionsBundle\Manager;
 
 use Solarium\Client;
+use Solarium\Core\Query\Query;
+use Solarium\Core\Query\QueryInterface;
 use TP\SolariumExtensionsBundle\Metadata\ClassMetadata;
 
 /**
@@ -104,10 +106,12 @@ class SolariumServiceManager
             $client = $this->getClient($service);
 
             foreach ($config as $endpoint => $update) {
-                $update->addCommit();
-
                 if ($endpoint === self::DEFAULT_ENDPOINT_KEY) {
                     $endpoint = null;
+                }
+
+                if (!$update instanceof QueryInterface) {
+                    continue;
                 }
 
                 $client->update($update, $endpoint);
