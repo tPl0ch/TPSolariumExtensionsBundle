@@ -10,6 +10,7 @@
  */
 namespace TP\SolariumExtensionsBundle\Tests;
 
+use Solarium\Core\Client\Endpoint;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
@@ -38,13 +39,31 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
      * @var array
      */
     public $configNelmio = array(
+        'endpoints' => array(
+            'default' => array(
+                'host' => 'localhost',
+                'port' => '8080',
+                'path' => 'solr-jobzauberer',
+                'core' => 'jobzauberer_test',
+                'timeout' => 5
+            ),
+            'test' => array(
+                'host' => 'localhost',
+                'port' => '8888',
+                'path' => 'test',
+                'core' => 'test_core',
+                'timeout' => 15
+            )
+        ),
         'default_client' => 'client1',
         'clients' => array(
             'client1' => array(
-                'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientOne'
+                'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientOne',
+                'endpoints' => array('default')
             ),
             'client2' => array(
-                'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientTwo'
+                'client_class' => 'TP\SolariumExtensionsBundle\Tests\StubClientTwo',
+                'endpoints'    => array('test', 'default')
             )
         ),
     );
@@ -126,9 +145,46 @@ class TPSolariumExtensionsExtensionTest extends \PHPUnit_Framework_TestCase
             $manager->getClient('solarium.client.client1')
         );
 
+        $endpointDefault = new Endpoint(array(
+            'host' => 'localhost',
+            'port' => '8080',
+            'path' => 'solr-jobzauberer',
+            'core' => 'jobzauberer_test',
+            'timeout' => 5,
+            'key' => 'default'
+        ));
+
+        $expected = array(
+            'default' => $endpointDefault
+        );
+
+        $this->assertEquals(
+            $expected,
+            $manager->getClient('solarium.client.client1')->getEndpoints()
+        );
+
         $this->assertInstanceOf(
             'TP\SolariumExtensionsBundle\Tests\StubClientTwo',
             $manager->getClient('solarium.client.client2')
+        );
+
+        $endpointTest = new Endpoint(array(
+            'host' => 'localhost',
+            'port' => '8888',
+            'path' => 'test',
+            'core' => 'test_core',
+            'timeout' => 15,
+            'key' => 'test'
+        ));
+
+        $expected = array(
+            'test'    => $endpointTest,
+            'default' => $endpointDefault
+        );
+
+        $this->assertEquals(
+            $expected,
+            $manager->getClient('solarium.client.client2')->getEndpoints()
         );
 
         $this->assertSame(
