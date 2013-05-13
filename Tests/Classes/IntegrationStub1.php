@@ -1,6 +1,6 @@
 <?php
 /**
- * AnnotationStub1.php
+ * IntegrationStub1.php
  *
  * This file is part of the SolariumExtensionsBundle.
  * Read the LICENSE file in the root of the project for information on copyright.
@@ -20,22 +20,17 @@ use TP\SolariumExtensionsBundle\Doctrine\Annotations as Solarium;
  *
  * @Solarium\Document(
  *      operations={
- *          @Solarium\Operation("save", service="solarium.client.save", endpoint="test.endpoint"),
- *          @Solarium\Operation("update", service="solarium.client.update")
+ *          @Solarium\Operation("save", service="solarium.client.client1", endpoint="default")
  *      },
  *      boost="2.4"
  * )
- * @Solarium\Mapping(
- *      mapping={"text_multi"="_tmulti"},
- *      strict=true
- * )
  */
-class AnnotationStub1
+class IntegrationStub1
 {
     /**
      * @var int
      *
-     * @Solarium\Id("custom_id", propertyAccess="id")
+     * @Solarium\Id("id", propertyAccess="id")
      */
     public $id = 1423;
 
@@ -49,30 +44,9 @@ class AnnotationStub1
     /**
      * @var string
      *
-     * @Solarium\Field(boost="2.3")
+     * @Solarium\Field(type="text", boost="2.3")
      */
     public $boostedField = 'boosted_string';
-
-    /**
-     * @var string
-     *
-     * @Solarium\Field(useMapping=false)
-     */
-    public $inflectedNoMapping = 'inflectedNoMapping';
-
-    /**
-     * @var string
-     *
-     * @Solarium\Field(inflect=false)
-     */
-    public $mappedNoInflection = 'mappedNoInflection';
-
-    /**
-     * @var string
-     *
-     * @Solarium\Field(inflect=false, useMapping=false)
-     */
-    public $noMappingNoInflection = 'noMappingNoInflection';
 
     /**
      * @var string
@@ -136,13 +110,6 @@ class AnnotationStub1
      * @Solarium\Field(type="date_multi", propertyAccess="__raw__")
      */
     public $dateCollection;
-
-    /**
-     * @var \stdClass
-     *
-     * @Solarium\Field(type="string", propertyAccess="title", inflect=false, useMapping=false)
-     */
-    public $objectWithPropertyAccess;
 
     /**
      * Constructor

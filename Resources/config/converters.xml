@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="solarium_extensions.converter.integer.class">TP\SolariumExtensionsBundle\Converter\Type\IntegerConverter</parameter>
+        <parameter key="solarium_extensions.converter.integer_multi.class">TP\SolariumExtensionsBundle\Converter\Type\IntegerConverter</parameter>
+        <parameter key="solarium_extensions.converter.string.class">TP\SolariumExtensionsBundle\Converter\Type\StringConverter</parameter>
+        <parameter key="solarium_extensions.converter.string_multi.class">TP\SolariumExtensionsBundle\Converter\Type\StringConverter</parameter>
+        <parameter key="solarium_extensions.converter.long.class">TP\SolariumExtensionsBundle\Converter\Type\FloatConverter</parameter>
+        <parameter key="solarium_extensions.converter.long_multi.class">TP\SolariumExtensionsBundle\Converter\Type\FloatConverter</parameter>
+        <parameter key="solarium_extensions.converter.text.class">TP\SolariumExtensionsBundle\Converter\Type\StringConverter</parameter>
+        <parameter key="solarium_extensions.converter.text_multi.class">TP\SolariumExtensionsBundle\Converter\Type\StringConverter</parameter>
+        <parameter key="solarium_extensions.converter.boolean.class">TP\SolariumExtensionsBundle\Converter\Type\BooleanConverter</parameter>
+        <parameter key="solarium_extensions.converter.boolean_multi.class">TP\SolariumExtensionsBundle\Converter\Type\BooleanConverter</parameter>
+        <parameter key="solarium_extensions.converter.float.class">TP\SolariumExtensionsBundle\Converter\Type\FloatConverter</parameter>
+        <parameter key="solarium_extensions.converter.float_multi.class">TP\SolariumExtensionsBundle\Converter\Type\FloatConverter</parameter>
+        <parameter key="solarium_extensions.converter.double.class">TP\SolariumExtensionsBundle\Converter\Type\FloatConverter</parameter>
+        <parameter key="solarium_extensions.converter.double_multi.class">TP\SolariumExtensionsBundle\Converter\Type\FloatConverter</parameter>
+        <parameter key="solarium_extensions.converter.date.class">TP\SolariumExtensionsBundle\Converter\Type\DateConverter</parameter>
+        <parameter key="solarium_extensions.converter.date_multi.class">TP\SolariumExtensionsBundle\Converter\Type\DateConverter</parameter>
+        <parameter key="solarium_extensions.converter.collection.class">TP\SolariumExtensionsBundle\Converter\ConverterCollection</parameter>
+    </parameters>
+
+    <services>
+
+        <service id="solarium_extensions.converter" class="%solarium_extensions.converter.collection.class%" public="false">
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_INT</argument>
+                <argument>%solarium_extensions.converter.integer.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_INT_MULTI</argument>
+                <argument>%solarium_extensions.converter.integer_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_STRING</argument>
+                <argument>%solarium_extensions.converter.string.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_STRING_MULTI</argument>
+                <argument>%solarium_extensions.converter.string_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_LONG</argument>
+                <argument>%solarium_extensions.converter.long.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_LONG_MULTI</argument>
+                <argument>%solarium_extensions.converter.long_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_TEXT</argument>
+                <argument>%solarium_extensions.converter.text.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_TEXT_MULTI</argument>
+                <argument>%solarium_extensions.converter.text_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_BOOLEAN</argument>
+                <argument>%solarium_extensions.converter.boolean.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_BOOLEAN_MULTI</argument>
+                <argument>%solarium_extensions.converter.boolean_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_FLOAT</argument>
+                <argument>%solarium_extensions.converter.float.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_FLOAT_MULTI</argument>
+                <argument>%solarium_extensions.converter.float_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_DOUBLE</argument>
+                <argument>%solarium_extensions.converter.double.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_DOUBLE_MULTI</argument>
+                <argument>%solarium_extensions.converter.double_multi.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_DATE</argument>
+                <argument>%solarium_extensions.converter.date.class%</argument>
+            </call>
+            <call method="registerConverter">
+                <argument type="constant">TP\SolariumExtensionsBundle\Doctrine\Annotations\Field::TYPE_DATE_MULTI</argument>
+                <argument>%solarium_extensions.converter.date_multi.class%</argument>
+            </call>
+        </service>
+
+    </services>
+</container>

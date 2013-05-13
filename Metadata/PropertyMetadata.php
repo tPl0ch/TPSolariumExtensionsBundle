@@ -32,7 +32,7 @@ class PropertyMetadata extends BasePropertyMetadata
     public $type;
 
     /**
-     * @var double
+     * @var float
      */
     public $boost;
 
