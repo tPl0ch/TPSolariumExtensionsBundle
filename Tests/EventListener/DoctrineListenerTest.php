@@ -101,10 +101,10 @@ class DoctrineListenerTest extends \PHPUnit_Framework_TestCase
         return array(
             array('postPersist', Operation::OPERATION_SAVE, 'test.save', true),
             array('postUpdate', Operation::OPERATION_UPDATE, 'test.update', true),
-            array('postRemove', Operation::OPERATION_DELETE, 'test.delete', true),
+            array('preRemove', Operation::OPERATION_DELETE, 'test.delete', true),
             array('postPersist', Operation::OPERATION_SAVE, 'test.save', false),
             array('postUpdate', Operation::OPERATION_UPDATE, 'test.update', false),
-            array('postRemove', Operation::OPERATION_DELETE, 'test.delete', false)
+            array('preRemove', Operation::OPERATION_DELETE, 'test.delete', false)
         );
     }
 }
