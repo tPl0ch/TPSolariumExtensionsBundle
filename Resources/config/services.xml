@@ -51,7 +51,7 @@
         <service id="solarium_extensions.doctrine_listener" class="%solarium_extensions.doctrine_listener.class%">
             <argument type="service" id="solarium_extensions.processor" />
             <tag name="doctrine.event_listener" event="postPersist" method="postPersist"/>
-            <tag name="doctrine.event_listener" event="postRemove" method="postRemove"/>
+            <tag name="doctrine.event_listener" event="preRemove" method="preRemove"/>
             <tag name="doctrine.event_listener" event="postUpdate" method="postUpdate"/>
             <tag name="kernel.event_listener" event="kernel.terminate" method="onKernelTerminate"/>
         </service>

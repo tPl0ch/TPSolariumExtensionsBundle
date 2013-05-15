@@ -72,7 +72,7 @@ class DoctrineListener
     /**
      * @param LifecycleEventArgs $args
      */
-    public function postRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args)
     {
         $object = $args->getEntity();
 
