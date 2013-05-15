@@ -21,6 +21,13 @@ use TP\SolariumExtensionsBundle\Metadata\PropertyMetadata;
  */
 class ValueConverter implements ValueConverterInterface
 {
+    /**
+     * @param object $object
+     * @param PropertyMetadata $property
+     * @param PropertyAccessor $accessor
+     *
+     * @return mixed|object
+     */
     public function convert($object, PropertyMetadata $property, PropertyAccessor $accessor)
     {
         $value = $object;
